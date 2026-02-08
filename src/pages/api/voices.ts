@@ -12,10 +12,12 @@ export const SPEECH_THEMES = [
 
 export type SpeechTheme = (typeof SPEECH_THEMES)[number];
 
-type Voice = {
+export type Voice = {
   voice_id: string;
   name: string;
   description?: string;
+  labels?: Record<string, string>;
+  category?: string;
 };
 type VoicesResponse = { voices: Voice[]; themes: SpeechTheme[] } | { error: string };
 
@@ -69,6 +71,8 @@ export default async function handler(
       voice_id: v.voice_id ?? "",
       name: v.name ?? "Unknown",
       description: v.description,
+      labels: v.labels,
+      category: v.category,
     }));
 
   return res.status(200).json({ voices, themes: [...SPEECH_THEMES] });

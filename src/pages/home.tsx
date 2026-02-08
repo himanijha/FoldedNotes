@@ -32,7 +32,7 @@ function buildCalendarDays(year: number, month: number) {
   }
   return days;
 }
-type VoiceOption = { voice_id: string; name: string; description?: string };
+type VoiceOption = { voice_id: string; name: string; description?: string; labels?: Record<string, string>; category?: string };
 
 const fredoka = Fredoka({
     variable: "--font-fredoka",
@@ -87,6 +87,7 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
     const [defaultVoiceId, setDefaultVoiceId] = useState<string>("");
     const [popupVoiceId, setPopupVoiceId] = useState<string>("");
     const [voiceListOpen, setVoiceListOpen] = useState(false);
+    const [pickingVoice, setPickingVoice] = useState(false);
     const [generatingAudio, setGeneratingAudio] = useState(false);
     const [noteAudioUrl, setNoteAudioUrl] = useState<string | null>(null);
     const noteAudioUrlRef = useRef<string | null>(null);
@@ -263,7 +264,7 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
         setBubbleOrigin({ x, y });
         setIsClosing(false);
         setSelectedNote(rec);
-        setPopupVoiceId(defaultVoiceId || voices[0]?.voice_id || "");
+        setPopupVoiceId("");
         setVoiceListOpen(false);
         setNoteAudioUrl(null);
         if (noteAudioUrlRef.current) {
@@ -301,10 +302,43 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
     };
 
     const generateAndPlayNote = async () => {
-        const voiceId = popupVoiceId || defaultVoiceId;
-        if (!selectedNote?.text || !voiceId) return;
-        setGeneratingAudio(true);
+        if (!selectedNote?.text || voices.length === 0) return;
         try {
+            // If the user manually picked a voice, use it; otherwise ask Gemini
+            let voiceId = popupVoiceId;
+            if (!voiceId) {
+                setPickingVoice(true);
+                try {
+                    const pickRes = await fetch("/api/pick-voice", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            text: selectedNote.text,
+                            emotion: selectedNote.emotion || "Misc",
+                            voices: voices.map((v) => ({
+                                voice_id: v.voice_id,
+                                name: v.name,
+                                description: v.description,
+                                labels: v.labels,
+                                category: v.category,
+                            })),
+                        }),
+                    });
+                    const pickData = await pickRes.json();
+                    if (pickRes.ok && pickData.voice_id) {
+                        voiceId = pickData.voice_id;
+                        setPopupVoiceId(voiceId);
+                    }
+                } catch {
+                    // Fallback to default if Gemini fails
+                } finally {
+                    setPickingVoice(false);
+                }
+            }
+            if (!voiceId) voiceId = defaultVoiceId || voices[0]?.voice_id || "";
+            if (!voiceId) throw new Error("No voice available");
+
+            setGeneratingAudio(true);
             const res = await fetch("/api/speech", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -327,6 +361,7 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
         } catch {
             // show error in UI if desired
         } finally {
+            setPickingVoice(false);
             setGeneratingAudio(false);
         }
     };
@@ -900,7 +935,7 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
                                         aria-expanded={voiceListOpen}
                                         aria-haspopup="listbox"
                                     >
-                                        {voices.find((v) => v.voice_id === (popupVoiceId || defaultVoiceId))?.name ?? "Choose voice"}
+                                        {pickingVoice ? "Picking best voice…" : (voices.find((v) => v.voice_id === popupVoiceId)?.name ?? "Choose voice")}
                                         <span className={homeStyles.notePopupVoiceChevron} aria-hidden>▾</span>
                                     </button>
                                     {voiceListOpen && (
