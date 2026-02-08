@@ -1,13 +1,17 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import styles from "@/styles/AudioRecorder.module.css";
-import { setStoredTranscript } from "@/components/GenerateFromTranscript";
-import clientPromise from "@/lib/mongodb.js";
+import styles from "../styles/AudioRecorder.module.css";
+import { setStoredTranscript } from "./GenerateFromTranscript";
 
 const LEVEL_BARS = 20;
 
 type RecordingState = "idle" | "recording" | "recorded" | "submitted" | "error";
 
-export default function AudioRecorder() {
+type AudioRecorderProps = {
+  onTranscriptReady?: (text: string) => void;
+  onEmotionReady?: (emotion: string) => void;
+};
+
+export default function AudioRecorder({ onTranscriptReady, onEmotionReady }: AudioRecorderProps) {
   const [state, setState] = useState<RecordingState>("idle");
   const [error, setError] = useState<string | null>(null);
   const [duration, setDuration] = useState(0);
@@ -18,7 +22,9 @@ export default function AudioRecorder() {
   const [submitResult, setSubmitResult] = useState<{
     text: string;
     language_code?: string;
+    submittedAt?: string;
   } | null>(null);
+  const [emotionResult, setEmotionResult] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const audioUrlRef = useRef<string | null>(null);
@@ -29,6 +35,17 @@ export default function AudioRecorder() {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const frequencyDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
+
+  const classifyEmotion = async (text: string) => {
+    const res = await fetch("/api/classify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
+    const data = await res.json();
+    console.log("Classify API response:", data); // <--- Check the JSON here
+    return data.emotion;
+  };
 
   const clearDuration = useCallback(() => {
     if (durationIntervalRef.current) {
@@ -182,45 +199,60 @@ export default function AudioRecorder() {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error ?? "Transcription failed");
 
-            // 4️⃣ Keep minimum sending time
             const elapsed = Date.now() - start;
             const wait = Math.max(0, SENDING_MIN_MS - elapsed);
-            if (wait > 0) await new Promise(r => setTimeout(r, wait));
+            if (wait > 0) await new Promise((r) => setTimeout(r, wait));
 
-            // 5️⃣ Save transcript to DB
-            const saveRes = await fetch("/api/notes", {
+            let emotion: string | null = null;
+            if (data.text?.trim()) {
+              try {
+                emotion = await classifyEmotion(data.text);
+              } catch {
+                // ignore classification errors
+              }
+            }
+
+            try {
+              await fetch("/api/notes", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    user: "username", // replace with actual user if available
-                    text: data.text ?? "",
-                    emotion: "happy",
+                  user: "username",
+                  text: data.text ?? "",
+                  emotion: emotion ?? "Misc",
                 }),
-            });
+              });
+            } catch {
+              // don't block UI if save fails
+            }
 
-            const saveData = await saveRes.json(); // ✅ read JSON only once
-            if (!saveRes.ok) throw new Error(saveData.error ?? "Failed to save note");
-
-            console.log("Saved note with ID:", saveData.insertedId);
-
-            // 6️⃣ Update local state
+            const submittedAt = new Date().toISOString();
             setSubmitResult({
-                text: data.text ?? "",
-                language_code: data.language_code,
+              text: data.text ?? "",
+              language_code: data.language_code,
+              submittedAt,
             });
-
             setState("submitted");
-        } catch (err) {
+
+            if (onTranscriptReady && data.text) {
+              onTranscriptReady(data.text);
+            }
+            if (emotion) {
+              setEmotionResult(emotion);
+              onEmotionReady?.(emotion);
+            }
+          } catch (err) {
             const elapsed = Date.now() - start;
             const wait = Math.max(0, SENDING_MIN_MS - elapsed);
-            if (wait > 0) await new Promise(r => setTimeout(r, wait));
-
+            if (wait > 0) await new Promise((r) => setTimeout(r, wait));
             setError(err instanceof Error ? err.message : "Failed to process recording");
             setState("error");
-        } finally {
-            setSubmitting(false);
-        }
-    }, []);
+          } finally {
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => setSubmitting(false));
+            });
+          }
+  }, []);
 
 
 
@@ -244,6 +276,7 @@ export default function AudioRecorder() {
     setState("idle");
     setError(null);
     setSubmitResult(null);
+    setEmotionResult(null);
   }, []);
 
   const formatTime = (seconds: number) => {
@@ -253,7 +286,7 @@ export default function AudioRecorder() {
   };
 
   return (
-    <div className={styles.wrapper}>
+    <div className={`${styles.wrapper} ${submitting ? styles.wrapperDuringAnimation : ""}`}>
       {submitting && (
         <div className={styles.sendingOverlay} aria-live="polite" aria-busy="true">
           <div className={styles.sendingOcean}>
@@ -348,6 +381,17 @@ export default function AudioRecorder() {
 
       {state === "submitted" && submitResult && (
         <div className={styles.submitted}>
+          {submitResult.submittedAt && (
+            <p className={styles.submittedMeta}>
+              Date recorded: {new Date(submitResult.submittedAt).toLocaleString()}
+            </p>
+          )}
+          {emotionResult && (
+            <div className={styles.emotionResult}>
+              <span className={styles.emotionLabel}>Detected emotion</span>
+              <span className={styles.emotionValue}>{emotionResult}</span>
+            </div>
+          )}
           <p className={styles.submittedLabel}>Transcript (for debugging only)</p>
           <p className={styles.submittedText}>{submitResult.text || "(empty)"}</p>
           {submitResult.language_code && (

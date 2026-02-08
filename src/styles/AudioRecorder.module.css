@@ -3,6 +3,11 @@
   position: relative;
 }
 
+/* Lock height during bottle animation so the box doesn't resize */
+.wrapperDuringAnimation {
+  min-height: 480px;
+}
+
 /* Bottle-in-ocean sending overlay */
 .sendingOverlay {
   position: fixed;
@@ -301,16 +306,54 @@
 .submitted {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
   gap: 12px;
 }
 
+.submitted .submittedText,
+.submitted .generateButton,
+.submitted .againButton {
+  align-self: stretch;
+}
+
+.submitted .submittedText {
+  text-align: left;
+}
+
+.emotionResult {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  font-family: var(--font-fredoka), system-ui, sans-serif;
+  background: linear-gradient(135deg, #e0f2ef 0%, #b8e4de 100%);
+  border-radius: 14px;
+  border: 2px solid rgba(45, 138, 122, 0.3);
+  box-shadow: 0 1px 3px rgba(45, 138, 122, 0.1);
+  transform: rotate(-0.4deg);
+}
+
+.emotionLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #1a4a42;
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+
+.emotionValue {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2d8a7a;
+}
+
 .submittedLabel {
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #555;
-  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #5a5a5a;
+  letter-spacing: 0.02em;
+  margin: 0 0 8px 0;
 }
 
 .stickerLabel {
@@ -333,19 +376,20 @@
 
 .submittedText {
   font-size: 1rem;
-  line-height: 1.5;
+  line-height: 1.55;
   color: #1a1a1a;
   margin: 0;
-  padding: 14px;
-  background: rgba(45, 138, 122, 0.08);
-  border-radius: 12px;
-  border-left: 4px solid #2d8a7a;
+  padding: 14px 16px;
+  background: linear-gradient(180deg, #fafdfc 0%, #f5faf9 100%);
+  border: 2px dashed rgba(45, 138, 122, 0.35);
+  border-radius: 14px;
+  font-family: var(--font-nunito), system-ui, sans-serif;
 }
 
 .submittedMeta {
   font-size: 0.85rem;
-  color: #666;
-  margin: 10px 0 14px 0;
+  color: #5a5a5a;
+  margin: 8px 0 0 0;
 }
 
 .transcriptInput {
