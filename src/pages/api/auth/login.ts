@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import clientPromise from "@/lib/mongodb.js";
+import clientPromise from "@/lib/mongodb";
 import { verifyPassword, createToken } from "@/lib/auth";
 
 export default async function handler(

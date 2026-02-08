@@ -37,7 +37,7 @@ const WS_URL = typeof window !== "undefined"
 
 const WEEKDAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
-type NoteItem = { id?: string; date?: string; dateDay?: string; emotion?: string };
+type NoteItem = { id?: string; date?: string; dateDay?: string; emotion?: string; text?: string };
 
 function getDateKey(year: number, month: number, day: number) {
   return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
@@ -85,6 +85,8 @@ export default function SettingsPage() {
   const [pronouns, setPronouns] = useState("");
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [notes, setNotes] = useState<NoteItem[]>([]);
+  const [weeklySummary, setWeeklySummary] = useState<string | null>(null);
+  const [loadingSummary, setLoadingSummary] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(() => {
     const d = new Date();
     return { year: d.getFullYear(), month: d.getMonth() };
@@ -157,6 +159,29 @@ export default function SettingsPage() {
       .then((data) => setNotes(Array.isArray(data.notes) ? data.notes : []))
       .catch(() => setNotes([]));
   }, [isSignedIn]);
+
+  // Fetch AI summary when notes change
+  useEffect(() => {
+    const texts = notes
+      .filter((n) => n.text && n.text.trim())
+      .map((n) => n.text as string);
+    if (texts.length === 0) {
+      setWeeklySummary(null);
+      return;
+    }
+    setLoadingSummary(true);
+    fetch("/api/summary", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages: texts.slice(0, 20) }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.summary) setWeeklySummary(data.summary);
+      })
+      .catch(() => {})
+      .finally(() => setLoadingSummary(false));
+  }, [notes]);
 
   const handleLogout = () => {
     if (typeof window === "undefined") return;
@@ -487,22 +512,19 @@ export default function SettingsPage() {
           </div>
             </div>
             <div className={settingsStyles.settingsColumn}>
-          <section className={settingsStyles.reflectionSection} aria-label="This week in one word">
+          <section className={settingsStyles.reflectionSection} aria-label="Your reflection">
             <p className={settingsStyles.reflectionLead}>
-              {dominantEmotion ? "This week felt…" : "Your week in one word"}
+              {weeklySummary ? "Reflection" : "Reflection"}
             </p>
-            {dominantEmotion ? (
-              <div
-                className={settingsStyles.reflectionWord}
-                style={{ background: emotionColorsAsGradient(weekEmotions) }}
-              >
-                <span className={settingsStyles.reflectionWordText}>{dominantEmotion}</span>
-              </div>
+            {loadingSummary ? (
+              <p className={settingsStyles.reflectionEmpty}>Reflecting on your notes…</p>
+            ) : weeklySummary ? (
+              <p className={settingsStyles.reflectionSummary}>{weeklySummary}</p>
             ) : (
               <p className={settingsStyles.reflectionEmpty}>Log notes on Home. Your reflection will appear here.</p>
             )}
-            {weekNotesTotal > 0 && (
-              <p className={settingsStyles.reflectionMuted} aria-hidden>from your notes</p>
+            {weeklySummary && (
+              <p className={settingsStyles.reflectionMuted} aria-hidden>generated from your notes</p>
             )}
           </section>
 

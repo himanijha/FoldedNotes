@@ -305,16 +305,19 @@
   width: 100%;
   background: var(--card-bg);
   border-radius: var(--card-radius);
-  padding: var(--space-section) var(--space-card);
+  padding: 28px var(--space-card);
   box-shadow: var(--card-shadow), var(--card-shadow-border);
   text-align: center;
+  border: 1px solid rgba(45, 138, 122, 0.1);
 }
 
 .reflectionLead {
-  margin: 0 0 12px 0;
-  font-size: 0.9rem;
-  color: var(--ink-soft);
+  margin: 0 0 14px 0;
+  font-family: var(--font-fredoka), system-ui, sans-serif;
+  font-size: 1.05rem;
+  color: var(--ink);
   font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .reflectionWord {
@@ -333,6 +336,17 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
+.reflectionSummary {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--ink);
+  line-height: 1.6;
+  font-style: italic;
+  max-width: 360px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .reflectionEmpty {
   margin: 0;
   font-size: 0.88rem;
@@ -341,10 +355,11 @@
 }
 
 .reflectionMuted {
-  margin: 10px 0 0 0;
-  font-size: 0.72rem;
-  color: rgba(0, 0, 0, 0.35);
-  font-weight: 500;
+  margin: 12px 0 0 0;
+  font-size: 0.75rem;
+  color: rgba(45, 138, 122, 0.5);
+  font-weight: 600;
+  letter-spacing: 0.03em;
 }
 
 /* ---------- EMOTION TRACKER (fun mood strip) ---------- */
