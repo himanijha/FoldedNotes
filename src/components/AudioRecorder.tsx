@@ -40,6 +40,17 @@ export default function AudioRecorder({ onTranscriptReady }: AudioRecorderProps)
   const animationFrameRef = useRef<number | null>(null);
   const frequencyDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
 
+  const classifyEmotion = async (text: string) => {
+    const res = await fetch("/api/classify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
+    const data = await res.json();
+    console.log("Classify API response:", data); // <--- Check the JSON here
+    return data.emotion;
+  };
+
   const clearDuration = useCallback(() => {
     if (durationIntervalRef.current) {
       clearInterval(durationIntervalRef.current);
