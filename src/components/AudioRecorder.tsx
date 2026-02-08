@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import styles from "@/styles/AudioRecorder.module.css";
+import { setStoredTranscript } from "@/components/GenerateFromTranscript";
 
 const LEVEL_BARS = 20;
 
@@ -13,14 +14,6 @@ export default function AudioRecorder() {
     Array(LEVEL_BARS).fill(0)
   );
   const [submitting, setSubmitting] = useState(false);
-  const [generatingAudio, setGeneratingAudio] = useState(false);
-  const [generatedAudioUrl, setGeneratedAudioUrl] = useState<string | null>(null);
-  const [generatedSegmentUrls, setGeneratedSegmentUrls] = useState<string[]>([]);
-  const [playingSegmentIndex, setPlayingSegmentIndex] = useState(0);
-  const generatedAudioUrlRef = useRef<string | null>(null);
-  const generatedSegmentUrlsRef = useRef<string[]>([]);
-  const playingSegmentIndexRef = useRef(0);
-  const audioElementRef = useRef<HTMLAudioElement | null>(null);
   const [submitResult, setSubmitResult] = useState<{
     text: string;
     language_code?: string;
@@ -206,54 +199,10 @@ export default function AudioRecorder() {
     }
   }, []);
 
-  const generateAudioFromTranscript = useCallback(async () => {
-    if (!submitResult?.text?.trim()) return;
-
-    setGeneratingAudio(true);
-    setError(null);
-    setGeneratedAudioUrl(null);
-    try {
-      const res = await fetch("/api/speech", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text: submitResult.text,
-          language_code: submitResult.language_code,
-        }),
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error ?? "Failed to generate audio");
-      }
-
-      const segments = data.segments as { audioBase64: string; contentType: string }[] | undefined;
-      if (!Array.isArray(segments) || segments.length === 0) {
-        throw new Error("No audio segments returned");
-      }
-
-      const urls: string[] = [];
-      for (const seg of segments) {
-        const binary = atob(seg.audioBase64);
-        const bytes = new Uint8Array(binary.length);
-        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-        const blob = new Blob([bytes], { type: seg.contentType || "audio/mpeg" });
-        urls.push(URL.createObjectURL(blob));
-      }
-
-      generatedSegmentUrlsRef.current.forEach((u) => URL.revokeObjectURL(u));
-      if (generatedAudioUrlRef.current) URL.revokeObjectURL(generatedAudioUrlRef.current);
-      generatedSegmentUrlsRef.current = urls;
-      generatedAudioUrlRef.current = urls[0];
-      setGeneratedSegmentUrls(urls);
-      setGeneratedAudioUrl(urls[0]);
-      playingSegmentIndexRef.current = 0;
-      setPlayingSegmentIndex(0);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to generate audio");
-    } finally {
-      setGeneratingAudio(false);
-    }
+  const goToGenerate = useCallback(() => {
+    if (!submitResult?.text) return;
+    setStoredTranscript(submitResult.text, submitResult.language_code);
+    window.location.href = "/generate";
   }, [submitResult]);
 
   const reset = useCallback(() => {
@@ -261,41 +210,11 @@ export default function AudioRecorder() {
       URL.revokeObjectURL(audioUrlRef.current);
       audioUrlRef.current = null;
     }
-    generatedSegmentUrlsRef.current.forEach((u) => URL.revokeObjectURL(u));
-    generatedSegmentUrlsRef.current = [];
-    if (generatedAudioUrlRef.current) {
-      URL.revokeObjectURL(generatedAudioUrlRef.current);
-      generatedAudioUrlRef.current = null;
-    }
-    setGeneratedSegmentUrls([]);
-    setGeneratedAudioUrl(null);
-    playingSegmentIndexRef.current = 0;
-    setPlayingSegmentIndex(0);
     chunksRef.current = [];
     setState("idle");
     setError(null);
     setSubmitResult(null);
   }, []);
-
-  const handleGeneratedAudioEnded = useCallback(() => {
-    const urls = generatedSegmentUrlsRef.current;
-    if (urls.length <= 1) return;
-    const current = playingSegmentIndexRef.current;
-    const next = current + 1;
-    if (next >= urls.length) return;
-    playingSegmentIndexRef.current = next;
-    setPlayingSegmentIndex(next);
-    const audio = audioElementRef.current;
-    if (audio) {
-      audio.src = urls[next];
-      audio.play().catch(() => {});
-    }
-  }, []);
-
-  const generatedAudioSrc =
-    generatedSegmentUrls.length > 0 && playingSegmentIndex < generatedSegmentUrls.length
-      ? generatedSegmentUrls[playingSegmentIndex]
-      : generatedAudioUrl;
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -399,7 +318,7 @@ export default function AudioRecorder() {
 
       {state === "submitted" && submitResult && (
         <div className={styles.submitted}>
-          <p className={styles.submittedLabel}>Transcript</p>
+          <p className={styles.submittedLabel}>Transcript (for debugging only)</p>
           <p className={styles.submittedText}>{submitResult.text || "(empty)"}</p>
           {submitResult.language_code && (
             <p className={styles.submittedMeta}>
@@ -409,24 +328,11 @@ export default function AudioRecorder() {
           <button
             type="button"
             className={styles.generateButton}
-            onClick={generateAudioFromTranscript}
-            disabled={generatingAudio || !submitResult.text?.trim()}
+            onClick={goToGenerate}
+            disabled={!submitResult.text?.trim()}
           >
-            {generatingAudio ? "Generating…" : "Generate audio from transcript"}
+            Generate audio from this transcript
           </button>
-          {(generatedAudioUrl || generatedSegmentUrls.length > 0) && (
-            <div className={styles.generatedAudio}>
-              <p className={styles.submittedLabel}>Generated audio</p>
-              <audio
-                ref={audioElementRef}
-                className={styles.audio}
-                src={generatedAudioSrc ?? undefined}
-                controls
-                preload="metadata"
-                onEnded={handleGeneratedAudioEnded}
-              />
-            </div>
-          )}
           <button
             type="button"
             className={styles.againButton}
