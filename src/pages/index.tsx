@@ -1,9 +1,7 @@
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import { Fredoka, Nunito } from "next/font/google";
-import styles from "../styles/Landing.module.css";
-import { useEffect, useState } from "react";
-
+import styles from "@/styles/Generate.module.css";
 
 const fredoka = Fredoka({
   variable: "--font-fredoka",
@@ -18,7 +16,7 @@ const nunito = Nunito({
 });
 
 const AudioRecorder = dynamic(
-  () => import("../components/AudioRecorder"),
+  () => import("@/components/AudioRecorder"),
   { ssr: false }
 );
 
@@ -34,7 +32,6 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
       <div className={`${styles.page} ${fredoka.variable} ${nunito.variable}`}>
         <div className={styles.bgBlobs} aria-hidden>
           <span className={styles.blob1} />
@@ -55,7 +52,6 @@ export default function Home() {
               through for anyone who needs to hear it.
             </p>
           </div>
-
           <AudioRecorder />
         </main>
       </div>

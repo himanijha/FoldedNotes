@@ -1,7 +1,7 @@
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import { Fredoka, Nunito } from "next/font/google";
-import styles from "@/styles/Home.module.css";
+import styles from "@/styles/Generate.module.css";
 
 const fredoka = Fredoka({
   variable: "--font-fredoka",
@@ -45,8 +45,7 @@ export default function RecordPage() {
               <span className={styles.headingWord}>Notes</span>
             </h1>
             <p className={styles.tagline}>
-              Record a message of hope, a tip, or something you went
-              through for anyone who needs to hear it.
+              Record your message of hope, a tip, or something you went through.
             </p>
           </div>
           <AudioRecorder />

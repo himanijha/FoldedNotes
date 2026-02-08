@@ -5,7 +5,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { Fredoka, Nunito } from "next/font/google";
 import clientPromise from "@/lib/mongodb";
-import styles from "@/styles/Home.module.css";
+import styles from "@/styles/Generate.module.css";
+import homeStyles from "@/styles/Home.module.css";
 
 const fredoka = Fredoka({
     variable: "--font-fredoka",
@@ -74,17 +75,22 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
             </Head>
 
             <div className={`${styles.page} ${fredoka.variable} ${nunito.variable}`}>
-                {/* Background */}
+                <div className={styles.bgBlobs} aria-hidden>
+                    <span className={styles.blob1} />
+                    <span className={styles.blob2} />
+                    <span className={styles.blob3} />
+                    <span className={styles.blob4} />
+                    <span className={styles.blob5} />
+                </div>
                 <div className={styles.rainbowArc} aria-hidden />
 
-                {/* Header */}
-                <header className={styles.headerBar}>
-                    <div className={styles.headerDate}>
+                <header className={homeStyles.headerBar}>
+                    <div className={homeStyles.headerDate}>
                         <time>{date}</time>
-                        <span className={styles.headerTime}>{time}</span>
+                        <span className={homeStyles.headerTime}>{time}</span>
                     </div>
 
-                    <Link href="/" className={styles.headerLogo}>
+                    <Link href="/" className={homeStyles.headerLogo}>
                         <span>Folded</span>
                         <span>Notes</span>
                     </Link>
@@ -92,33 +98,24 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
                     <div />
                 </header>
 
-                {/* Main */}
-                <main className={styles.mainFull}>
-                    {/* Recordings */}
-                    <aside className={styles.homeColRecordings}>
-                        <h2 className={styles.homeColTitle}>My recordings</h2>
+                <main className={homeStyles.mainFull}>
+                    <aside className={homeStyles.homeColRecordings}>
+                        <h2 className={homeStyles.homeColTitle}>My recordings</h2>
                         {Array.isArray(recordings) && recordings.length > 0 ? (
-                            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                            <div className={homeStyles.recordingsList}>
                                 {recordings.map((rec) => (
                                     <button
                                         key={rec._id}
+                                        type="button"
+                                        className={homeStyles.recordingItem}
                                         onClick={() => openRecordingPopup(rec.text || "No content")}
-                                        style={{
-                                            padding: "12px 16px",
-                                            borderRadius: "12px",
-                                            border: "1px solid rgba(0,0,0,0.1)",
-                                            background: "#f9f9f9",
-                                            textAlign: "left",
-                                            cursor: "pointer",
-                                            boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-                                        }}
                                     >
                                         {rec.text ? rec.text.slice(0, 50) + (rec.text.length > 50 ? "..." : "") : "No content"}
                                     </button>
                                 ))}
                             </div>
                         ) : (
-                            <p className={styles.recordingsEmpty}>
+                            <p className={homeStyles.recordingsEmpty}>
                                 🎙️ <br />
                                 No recordings yet.
                                 <br />
@@ -127,23 +124,21 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
                         )}
                     </aside>
 
-                    {/* Categories */}
-                    <section className={styles.homeColCategories}>
-                        <h2 className={styles.homeColTitle}>Categories</h2>
-                        <ul className={styles.categoriesList}>
+                    <section className={homeStyles.homeColCategories}>
+                        <h2 className={homeStyles.homeColTitle}>Categories</h2>
+                        <ul className={homeStyles.categoriesList}>
                             {CATEGORIES.map((name) => (
-                                <li key={name} className={styles.categoryItem}>
+                                <li key={name} className={homeStyles.categoryItem}>
                                     {name}
                                 </li>
                             ))}
                         </ul>
                     </section>
 
-                    {/* Record CTA */}
-                    <div className={styles.homeColRecord}>
+                    <div className={homeStyles.homeColRecord}>
                         <button
                             type="button"
-                            className={styles.recordTrigger}
+                            className={homeStyles.recordTrigger}
                             onClick={() => router.push("/")}
                         >
                             <div>
@@ -157,20 +152,20 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
                 {/* Recording Popup */}
                 {popupOpen && (
                     <div
-                        className={styles.recordPopupOverlay}
+                        className={homeStyles.recordPopupOverlay}
                         onClick={(e) => {
                             if (e.target === e.currentTarget) closeRecordingPopup();
                         }}
                     >
-                        <div className={styles.recordPopupCard}>
+                        <div className={homeStyles.recordPopupCard}>
                             <button
-                                className={styles.recordPopupClose}
+                                className={homeStyles.recordPopupClose}
                                 onClick={closeRecordingPopup}
                                 aria-label="Close recording popup"
                             >
                                 &times;
                             </button>
-                            <h2 className={styles.recordPopupTitle}>Recording</h2>
+                            <h2 className={homeStyles.recordPopupTitle}>Recording</h2>
                             <p>{popupText}</p>
                         </div>
                     </div>

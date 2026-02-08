@@ -14,7 +14,10 @@
     --ink: #1a1a1a;
     --ink-soft: #5a5a5a;
     --paper: #ffffff;
+    --paper-notes: #faf8f3;
     --paper-shadow: rgba(45, 138, 122, 0.12);
+    --notes-rings-bar: #a89888;
+    --notes-rings-hole: #6a5c52;
     min-height: 100vh;
     padding: 24px;
     background: linear-gradient(165deg, #fff0f2, #fff5ed, #fffef5, #f2fff5, #f0f8ff, #f5f0ff, #fff0f2);
@@ -72,7 +75,7 @@
     gap: 8px;
     justify-content: center;
     align-items: baseline;
-    font-family: var(--font-rainbowArc), system-ui, sans-serif;
+    font-family: var(--font-fredoka), system-ui, sans-serif;
     font-size: 2.8rem;
     font-weight: 800;
     background: linear-gradient(120deg, var(--pride-r) 0%, var(--pride-o) 20%, var(--accent) 45%, var(--pride-b) 70%, var(--pride-p) 100%);
@@ -109,20 +112,53 @@
 .homeColRecordings,
 .homeColCategories,
 .homeColRecord {
-    background: var(--paper);
+    background: var(--paper-notes);
     border-radius: 20px;
     padding: 24px;
-    box-shadow: 0 4px 0 rgba(0,0,0,0.05), 0 12px 28px var(--paper-shadow);
+    box-shadow: 0 4px 0 rgba(0,0,0,0.06), 0 12px 28px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
     min-height: 75vh;
     max-height: 75vh;
     overflow-y: auto;
     text-align: left;
+    position: relative;
+    z-index: 2;
 }
 
+/* My recordings: notes pad with rings at top */
 .homeColRecordings {
     transform: rotate(-0.6deg);
     scrollbar-width: none;
     -ms-overflow-style: none;
+    padding-top: 44px;
+}
+
+.homeColRecordings::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 28px;
+    background: linear-gradient(180deg, var(--notes-rings-bar) 0%, #908070 100%);
+    border-radius: 20px 20px 0 0;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 1;
+}
+
+.homeColRecordings::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 6px;
+    height: 20px;
+    background-image:
+        radial-gradient(circle at 20% 10px, var(--notes-rings-hole) 0, var(--notes-rings-hole) 6px, transparent 6px),
+        radial-gradient(circle at 50% 10px, var(--notes-rings-hole) 0, var(--notes-rings-hole) 6px, transparent 6px),
+        radial-gradient(circle at 80% 10px, var(--notes-rings-hole) 0, var(--notes-rings-hole) 6px, transparent 6px);
+    background-repeat: no-repeat;
+    pointer-events: none;
+    z-index: 2;
 }
 
     .homeColRecordings::-webkit-scrollbar {
@@ -148,6 +184,32 @@
     font-size: 1.1rem;
     margin-bottom: 16px;
     color: var(--ink);
+}
+
+/* ---------- RECORDING LIST ITEMS (note lines) ---------- */
+
+.recordingsList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.recordingItem {
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid rgba(0,0,0,0.08);
+    background: rgba(255,255,255,0.8);
+    text-align: left;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: var(--ink);
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.recordingItem:hover {
+    background: rgba(255,255,255,0.95);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
 }
 
 /* ---------- RECORDINGS EMPTY ---------- */
@@ -225,7 +287,7 @@
 }
 
 .recordPopupCard {
-    background: white;
+    background: var(--paper-notes, #faf8f3);
     border-radius: 20px;
     padding: 28px;
     width: 90%;
@@ -233,7 +295,7 @@
     max-height: 80vh;
     overflow-y: auto;
     position: relative;
-    box-shadow: 0 12px 28px rgba(0,0,0,0.2);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.06);
 }
 
 .recordPopupClose {

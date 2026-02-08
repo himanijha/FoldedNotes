@@ -2,7 +2,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Fredoka, Nunito } from "next/font/google";
-import styles from "@/styles/Home.module.css";
+import styles from "@/styles/Generate.module.css";
 import settingsStyles from "@/styles/Settings.module.css";
 
 const fredoka = Fredoka({
@@ -102,10 +102,15 @@ export default function SettingsPage() {
         </div>
         <div className={styles.rainbowArc} aria-hidden />
         <main className={styles.main}>
-          <Link href="/" className={styles.heading}>
-            <span className={styles.headingWord}>Folded</span>
-            <span className={styles.headingWord}>Notes</span>
-          </Link>
+          <div className={styles.intro}>
+            <h1 className={styles.heading}>
+              <Link href="/" style={{ textDecoration: "none" }}>
+                <span className={styles.headingWord}>Folded</span>
+                <span className={styles.headingWord}>Notes</span>
+              </Link>
+            </h1>
+            <p className={styles.tagline}>Haptic settings – vibration and pulse rate</p>
+          </div>
           <div className={settingsStyles.settingsCard}>
             <h2 className={settingsStyles.settingsTitle}>Haptic Settings</h2>
 
