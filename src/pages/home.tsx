@@ -1,3 +1,5 @@
+"use client";
+
 import Head from "next/head";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -55,6 +57,13 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
     const router = useRouter();
     const [popupOpen, setPopupOpen] = useState(false);
     const [popupText, setPopupText] = useState("");
+
+    useEffect(() => {
+        const anonId = typeof window !== "undefined" ? localStorage.getItem("anon_id") : null;
+        if (!anonId) {
+            router.push("/login");
+        }
+    }, [router]);
 
     const openRecordingPopup = (text: string) => {
         setPopupText(text);
