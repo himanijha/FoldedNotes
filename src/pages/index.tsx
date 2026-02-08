@@ -21,17 +21,6 @@ const AudioRecorder = dynamic(
 );
 
 export default function Home() {
-  async function classifyEmotion(text: string) {
-    const res = await fetch("/api/classify", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
-    });
-
-    const data = await res.json();
-    console.log("Emotion result:", data);
-  }
-
   return (
     <>
       <Head>
@@ -65,7 +54,7 @@ export default function Home() {
             </p>
           </div>
 
-          <AudioRecorder onTranscriptReady={classifyEmotion} />
+          <AudioRecorder />
         </main>
       </div>
     </>

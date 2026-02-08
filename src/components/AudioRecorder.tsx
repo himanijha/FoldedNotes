@@ -8,9 +8,10 @@ type RecordingState = "idle" | "recording" | "recorded" | "submitted" | "error";
 
 type AudioRecorderProps = {
   onTranscriptReady?: (text: string) => void;
+  onEmotionReady?: (emotion: string) => void;
 };
 
-export default function AudioRecorder({ onTranscriptReady }: AudioRecorderProps) {
+export default function AudioRecorder({ onTranscriptReady, onEmotionReady }: AudioRecorderProps) {
   const [state, setState] = useState<RecordingState>("idle");
   const [error, setError] = useState<string | null>(null);
   const [duration, setDuration] = useState(0);
@@ -21,7 +22,9 @@ export default function AudioRecorder({ onTranscriptReady }: AudioRecorderProps)
   const [submitResult, setSubmitResult] = useState<{
     text: string;
     language_code?: string;
+    submittedAt?: string;
   } | null>(null);
+  const [emotionResult, setEmotionResult] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const audioUrlRef = useRef<string | null>(null);
@@ -199,14 +202,28 @@ export default function AudioRecorder({ onTranscriptReady }: AudioRecorderProps)
       const wait = Math.max(0, SENDING_MIN_MS - elapsed);
       await new Promise((r) => setTimeout(r, wait));
 
+      const submittedAt = new Date().toISOString();
       setSubmitResult({
         text: data.text ?? "",
         language_code: data.language_code,
+        submittedAt,
       });
       setState("submitted");
 
       if (onTranscriptReady && data.text) {
         onTranscriptReady(data.text);
+      }
+
+      if (data.text?.trim()) {
+        try {
+          const emotion = await classifyEmotion(data.text);
+          if (emotion) {
+            setEmotionResult(emotion);
+            onEmotionReady?.(emotion);
+          }
+        } catch {
+          // ignore classification errors
+        }
       }
     } catch (err) {
       const elapsed = Date.now() - start;
@@ -214,7 +231,10 @@ export default function AudioRecorder({ onTranscriptReady }: AudioRecorderProps)
       await new Promise((r) => setTimeout(r, wait));
       setError(err instanceof Error ? err.message : "Failed to process recording");
     } finally {
-      setSubmitting(false);
+      // Hide overlay after layout has updated to submitted state so the box doesn't visibly resize
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setSubmitting(false));
+      });
     }
   }, []);
 
@@ -233,6 +253,7 @@ export default function AudioRecorder({ onTranscriptReady }: AudioRecorderProps)
     setState("idle");
     setError(null);
     setSubmitResult(null);
+    setEmotionResult(null);
   }, []);
 
   const formatTime = (seconds: number) => {
@@ -242,7 +263,7 @@ export default function AudioRecorder({ onTranscriptReady }: AudioRecorderProps)
   };
 
   return (
-    <div className={styles.wrapper}>
+    <div className={`${styles.wrapper} ${submitting ? styles.wrapperDuringAnimation : ""}`}>
       {submitting && (
         <div className={styles.sendingOverlay} aria-live="polite" aria-busy="true">
           <div className={styles.sendingOcean}>
@@ -337,6 +358,17 @@ export default function AudioRecorder({ onTranscriptReady }: AudioRecorderProps)
 
       {state === "submitted" && submitResult && (
         <div className={styles.submitted}>
+          {submitResult.submittedAt && (
+            <p className={styles.submittedMeta}>
+              Date recorded: {new Date(submitResult.submittedAt).toLocaleString()}
+            </p>
+          )}
+          {emotionResult && (
+            <div className={styles.emotionResult}>
+              <span className={styles.emotionLabel}>Detected emotion</span>
+              <span className={styles.emotionValue}>{emotionResult}</span>
+            </div>
+          )}
           <p className={styles.submittedLabel}>Transcript (for debugging only)</p>
           <p className={styles.submittedText}>{submitResult.text || "(empty)"}</p>
           {submitResult.language_code && (

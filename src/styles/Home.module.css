@@ -18,6 +18,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
   font-family: var(--font-nunito), system-ui, sans-serif;
   background: linear-gradient(
     165deg,
@@ -143,8 +145,8 @@
   width: 100%;
   max-width: 420px;
   padding: 36px 28px 40px;
-  margin: 24px;
   padding-top: 42px;
+  margin: 0 auto;
   background: var(--paper);
   border-radius: 20px;
   box-shadow:
@@ -155,6 +157,9 @@
   transform: rotate(-0.8deg);
   animation: noteIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
 }
 
 .main::after {
@@ -348,6 +353,49 @@
 .againButton:hover {
   background: rgba(45, 138, 122, 0.22);
   transform: scale(1.05) rotate(-0.5deg);
+}
+
+.emotionLoading {
+  margin: 20px 0 0;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.emotionError {
+  margin: 16px 0 0;
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  color: #b91c1c;
+  background: #fef2f2;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.emotionResult {
+  margin-top: 20px;
+  padding: 16px 20px;
+  background: var(--accent-soft);
+  border: 2px solid var(--accent-border);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.emotionLabel {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.emotionValue {
+  font-family: var(--font-fredoka), system-ui, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--accent);
 }
 
 @media (max-width: 600px) {
