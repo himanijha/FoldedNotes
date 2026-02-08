@@ -383,6 +383,56 @@
   gap: 6px;
 }
 
+/* Emotion colors (Inside Out–inspired) */
+.emotionResult[data-emotion="Angry"] {
+  background: linear-gradient(135deg, #f5e2df 0%, #e8c4be 100%);
+  border-color: rgba(180, 75, 65, 0.4);
+}
+.emotionResult[data-emotion="Angry"] .emotionLabel { color: #5c2a26; }
+.emotionResult[data-emotion="Angry"] .emotionValue { color: #a83d35; }
+
+.emotionResult[data-emotion="Anxious"] {
+  background: linear-gradient(135deg, #f5eadc 0%, #e8d4bc 100%);
+  border-color: rgba(180, 120, 65, 0.4);
+}
+.emotionResult[data-emotion="Anxious"] .emotionLabel { color: #5c4526; }
+.emotionResult[data-emotion="Anxious"] .emotionValue { color: #b87838; }
+
+.emotionResult[data-emotion="Sad"] {
+  background: linear-gradient(135deg, #dce8f0 0%, #b8d4e4 100%);
+  border-color: rgba(75, 120, 155, 0.4);
+}
+.emotionResult[data-emotion="Sad"] .emotionLabel { color: #2d4a5c; }
+.emotionResult[data-emotion="Sad"] .emotionValue { color: #4a7ba7; }
+
+.emotionResult[data-emotion="Happy"] {
+  background: linear-gradient(135deg, #f5efd8 0%, #e8e0b8 100%);
+  border-color: rgba(200, 155, 50, 0.4);
+}
+.emotionResult[data-emotion="Happy"] .emotionLabel { color: #5c5026; }
+.emotionResult[data-emotion="Happy"] .emotionValue { color: #c49428; }
+
+.emotionResult[data-emotion="Fear"] {
+  background: linear-gradient(135deg, #e8e4f0 0%, #d4cce0 100%);
+  border-color: rgba(100, 85, 140, 0.4);
+}
+.emotionResult[data-emotion="Fear"] .emotionLabel { color: #3d3550; }
+.emotionResult[data-emotion="Fear"] .emotionValue { color: #6b5b8e; }
+
+.emotionResult[data-emotion="Surprise"] {
+  background: linear-gradient(135deg, #f5e4ec 0%, #e8ccd8 100%);
+  border-color: rgba(165, 95, 115, 0.4);
+}
+.emotionResult[data-emotion="Surprise"] .emotionLabel { color: #5c3d44; }
+.emotionResult[data-emotion="Surprise"] .emotionValue { color: #a85a6e; }
+
+.emotionResult[data-emotion="Love/Warmth"] {
+  background: linear-gradient(135deg, #f5f0d8 0%, #e8e0b8 100%);
+  border-color: rgba(200, 170, 60, 0.4);
+}
+.emotionResult[data-emotion="Love/Warmth"] .emotionLabel { color: #5c5426; }
+.emotionResult[data-emotion="Love/Warmth"] .emotionValue { color: #c4a038; }
+
 .emotionLabel {
   font-size: 0.8rem;
   font-weight: 600;
