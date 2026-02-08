@@ -6,6 +6,43 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+### 1. Install and run
+
+```bash
+npm install
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+### 2. ElevenLabs integration (Submit / process recording)
+
+To use **Submit to process** (send the recording to ElevenLabs for transcription):
+
+1. **Get an API key**
+   - Sign up at [ElevenLabs](https://elevenlabs.io).
+   - Go to [API keys](https://elevenlabs.io/app/settings/api-keys) and create a key.
+
+2. **Add the key locally**
+   - Copy `.env.example` to `.env.local`:
+     ```bash
+     cp .env.example .env.local
+     ```
+   - Edit `.env.local` and set:
+     ```
+     ELEVENLABS_API_KEY=your_actual_key_here
+     ```
+
+3. **Restart the dev server** so it picks up the new env.
+
+4. **Flow in the app**
+   - Record a message → Stop → **Submit to process**.
+   - The app sends the audio to ElevenLabs Speech-to-Text (Scribe v2) and shows the transcript (and language) when done.
+
+The API route is `POST /api/transcribe`. It expects JSON `{ "audioBase64": "<base64>", "contentType": "audio/webm" }` and returns `{ "text", "language_code", "words?" }`. Do not commit `.env.local` or your API key.
+
+## Development
+
 First, run the development server:
 
 ```bash
