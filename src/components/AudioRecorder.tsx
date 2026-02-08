@@ -214,11 +214,14 @@ export default function AudioRecorder({ onTranscriptReady, onEmotionReady, onSub
             }
 
             try {
+              const userId = typeof window !== "undefined"
+                ? (localStorage.getItem("user_id") || localStorage.getItem("anon_id"))
+                : "anonymous";
               const saveRes = await fetch("/api/notes", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                  user: "username",
+                  user: userId || "anonymous",
                   text: data.text ?? "",
                   emotion: emotion ?? "Misc",
                 }),

@@ -1,17 +1,9 @@
+"use client";
+
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import { Fredoka, Nunito } from "next/font/google";
 import styles from "@/styles/Generate.module.css";
-
-import clientPromise from "../lib/mongodb";
-
-export default async function handler(req, res) {
-    const client = await clientPromise;
-    const db = client.db("myDatabase");
-
-    const notes = await db.collection("notes").find({}).toArray();
-    res.status(200).json(notes);
-}
 
 const fredoka = Fredoka({
   variable: "--font-fredoka",
@@ -30,7 +22,7 @@ const AudioRecorder = dynamic(
   { ssr: false }
 );
 
-export default function Home() {
+export default function IndexPage() {
   return (
     <>
       <Head>

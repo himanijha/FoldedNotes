@@ -1,7 +1,9 @@
 import Head from "next/head";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
 import { Fredoka, Nunito } from "next/font/google";
+import { majorityEmotion, emotionColorsAsGradient, EMOTION_COLORS } from "@/lib/emotions";
 import homeStyles from "@/styles/Home.module.css";
 import settingsStyles from "@/styles/Settings.module.css";
 
@@ -33,17 +35,6 @@ const WS_URL = typeof window !== "undefined"
   ? (process.env.NEXT_PUBLIC_WS_PROXY_URL || "ws://localhost:8080")
   : "";
 
-const EMOTION_COLORS: Record<string, string> = {
-  Happy: "#c9a028",
-  Sad: "#4a7a98",
-  Angry: "#b85a52",
-  Anxious: "#c48848",
-  Fear: "#7a6a9a",
-  Surprise: "#5a9a7a",
-  "Love/Warmth": "#b86a82",
-  Misc: "#8a8a92",
-};
-
 const WEEKDAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
 type NoteItem = { id?: string; date?: string; dateDay?: string; emotion?: string };
@@ -65,8 +56,8 @@ function buildCalendarDays(year: number, month: number) {
   return days;
 }
 
-function buildLast7Days(notesByDate: Record<string, string>) {
-  const days: { dateKey: string; label: string; emotion: string | null }[] = [];
+function buildLast7Days(emotionsByDate: Record<string, string[]>) {
+  const days: { dateKey: string; label: string; emotions: string[] }[] = [];
   const now = new Date();
   for (let i = 6; i >= 0; i--) {
     const d = new Date(now);
@@ -76,13 +67,14 @@ function buildLast7Days(notesByDate: Record<string, string>) {
     days.push({
       dateKey,
       label,
-      emotion: notesByDate[dateKey] ?? null,
+      emotions: emotionsByDate[dateKey] ?? [],
     });
   }
   return days;
 }
 
 export default function SettingsPage() {
+  const router = useRouter();
   const { date, time } = useCurrentTime();
   const [intensity, setIntensity] = useState(7);
   const [rate, setRate] = useState(5);
@@ -109,22 +101,39 @@ export default function SettingsPage() {
   }, []);
 
   useEffect(() => {
-    fetch("/api/notes")
+    if (typeof window === "undefined") return;
+    const userId = localStorage.getItem("user_id") || localStorage.getItem("anon_id");
+    if (!userId) {
+      setNotes([]);
+      return;
+    }
+    fetch(`/api/notes?user=${encodeURIComponent(userId)}`)
       .then((r) => r.json())
       .then((data) => setNotes(Array.isArray(data.notes) ? data.notes : []))
       .catch(() => setNotes([]));
-  }, []);
+  }, [isSignedIn]);
 
+  const handleLogout = () => {
+    if (typeof window === "undefined") return;
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("user_id");
+    setIsSignedIn(false);
+    setProfileInitial("Y");
+    router.push("/login");
+  };
 
-  const notesByDate: Record<string, string> = {};
+  const emotionsByDate: Record<string, string[]> = {};
   notes.forEach((n) => {
     const key = n.dateDay ?? n.date?.slice(0, 10);
-    if (key && n.emotion && !notesByDate[key]) notesByDate[key] = n.emotion;
+    if (key && n.emotion) {
+      if (!emotionsByDate[key]) emotionsByDate[key] = [];
+      emotionsByDate[key].push(n.emotion);
+    }
   });
 
-  const last7Days = buildLast7Days(notesByDate);
-  const weekNoteCount = last7Days.filter((d) => d.emotion).length;
-  const weekEmotions = last7Days.map((d) => d.emotion).filter(Boolean) as string[];
+  const last7Days = buildLast7Days(emotionsByDate);
+  const weekNoteCount = last7Days.filter((d) => d.emotions.length > 0).length;
+  const weekEmotions = last7Days.flatMap((d) => d.emotions);
   const emotionCounts: Record<string, number> = {};
   weekEmotions.forEach((e) => { emotionCounts[e] = (emotionCounts[e] ?? 0) + 1; });
   const dominantEmotion = weekEmotions.length > 0
@@ -250,10 +259,19 @@ export default function SettingsPage() {
                     ? "You're using FoldedNotes with your account."
                     : "No account — use the app as a guest. Sign in to save across devices."}
                 </p>
-                {!isSignedIn && (
+                {!isSignedIn ? (
                   <Link href="/login" className={settingsStyles.profileLink}>
                     Sign in or create account
                   </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className={settingsStyles.profileLink}
+                    style={{ background: "none", border: "none", padding: 0, cursor: "pointer", fontFamily: "inherit" }}
+                  >
+                    Log out
+                  </button>
                 )}
               </div>
             </div>
@@ -261,22 +279,26 @@ export default function SettingsPage() {
           <section className={settingsStyles.emotionTrackerSection} aria-label="How you've been">
             <h2 className={settingsStyles.emotionTrackerTitle}>How you've been</h2>
             <div className={settingsStyles.emotionTrackerStrip}>
-              {last7Days.map((d) => (
-                <div
-                  key={d.dateKey}
-                  className={settingsStyles.emotionTrackerDay}
-                  title={d.emotion ? `${d.dateKey}: ${d.emotion}` : d.dateKey}
-                >
-                  <span
-                    className={settingsStyles.emotionTrackerDot}
-                    style={{
-                      background: d.emotion ? EMOTION_COLORS[d.emotion] ?? EMOTION_COLORS.Misc : "rgba(0,0,0,0.08)",
-                    }}
-                    aria-hidden
-                  />
-                  <span className={settingsStyles.emotionTrackerLabel}>{d.label}</span>
-                </div>
-              ))}
+              {last7Days.map((d) => {
+                const dayMajority = majorityEmotion(d.emotions);
+                const dayColor = emotionColorsAsGradient(d.emotions);
+                return (
+                  <div
+                    key={d.dateKey}
+                    className={settingsStyles.emotionTrackerDay}
+                    title={dayMajority ? `${d.dateKey}: ${dayMajority}` : d.dateKey}
+                  >
+                    <span
+                      className={settingsStyles.emotionTrackerDot}
+                      style={{
+                        background: d.emotions.length > 0 ? dayColor : "rgba(0,0,0,0.08)",
+                      }}
+                      aria-hidden
+                    />
+                    <span className={settingsStyles.emotionTrackerLabel}>{d.label}</span>
+                  </div>
+                );
+              })}
             </div>
             <p className={settingsStyles.emotionTrackerHint}>
               {weekNoteCount === 0
@@ -428,24 +450,34 @@ export default function SettingsPage() {
               ))}
             </div>
             <div className={settingsStyles.calendarGrid} role="grid">
-              {calendarDays.map(({ day, dateKey }, i) => (
-                <div
-                  key={i}
-                  className={settingsStyles.calendarDay}
-                  data-has-note={dateKey && notesByDate[dateKey] ? "true" : undefined}
-                  data-emotion={dateKey && notesByDate[dateKey] ? notesByDate[dateKey] : undefined}
-                  role="gridcell"
-                >
-                  {day > 0 && (
-                    <>
-                      {notesByDate[dateKey] && (
-                        <span className={settingsStyles.calendarEmotionBg} aria-hidden />
-                      )}
-                      <span className={settingsStyles.calendarDayNum}>{day}</span>
-                    </>
-                  )}
-                </div>
-              ))}
+              {calendarDays.map(({ day, dateKey }, i) => {
+                const dayEmotions: string[] = dateKey && Array.isArray(emotionsByDate[dateKey]) ? emotionsByDate[dateKey] : [];
+                const dayColor = emotionColorsAsGradient(dayEmotions);
+                const dayMajority = majorityEmotion(dayEmotions);
+                const hasNote = dayEmotions.length > 0;
+                return (
+                  <div
+                    key={i}
+                    className={settingsStyles.calendarDay}
+                    data-has-note={hasNote ? "true" : undefined}
+                    data-emotion={dayMajority ?? undefined}
+                    role="gridcell"
+                  >
+                    {day > 0 && (
+                      <>
+                        {hasNote && (
+                          <span
+                            className={settingsStyles.calendarEmotionBg}
+                            style={{ background: dayColor }}
+                            aria-hidden
+                          />
+                        )}
+                        <span className={settingsStyles.calendarDayNum}>{day}</span>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </section>
             </div>

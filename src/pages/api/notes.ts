@@ -15,9 +15,11 @@ export default async function handler(req, res) {
                 });
             }
             const db = client.db("FoldedNotes");
+            const user = typeof req.query.user === "string" ? req.query.user.trim() : null;
+            const filter = user ? { user } : {};
             const cursor = db
                 .collection("notes")
-                .find({})
+                .find(filter)
                 .sort({ date: -1 });
             const raw = await cursor.toArray();
             const notes = raw.map(({ _id, ...doc }) => ({
@@ -29,10 +31,11 @@ export default async function handler(req, res) {
 
         if (req.method === "POST") {
             const { user, text, emotion } = req.body;
-            console.log("Received POST:", { user, text, emotion }); // ✅ log request
+            const userId = typeof user === "string" && user.trim() ? user.trim() : "anonymous";
+            console.log("Received POST:", { user: userId, text, emotion });
 
-            if (!text || !user) {
-                return res.status(400).json({ error: "Missing user or text" });
+            if (!text) {
+                return res.status(400).json({ error: "Missing text" });
             }
 
             const client = await clientPromise;
@@ -40,7 +43,7 @@ export default async function handler(req, res) {
 
             const now = new Date();
             const doc = {
-                user: "username",
+                user: userId,
                 date: now.toISOString(),
                 dateDay: new Intl.DateTimeFormat("en-CA").format(now),
                 text: text,

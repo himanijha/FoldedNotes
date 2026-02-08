@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import { Fredoka, Nunito } from "next/font/google";
 import { mergeAudioBlobs, segmentsToBlobs } from "@/lib/audio";
+import { majorityEmotion, emotionColorsAsGradient } from "@/lib/emotions";
 import homeStyles from "@/styles/Home.module.css";
 import settingsStyles from "@/styles/Settings.module.css";
 
@@ -79,6 +80,7 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
     const [bubbleOrigin, setBubbleOrigin] = useState<{ x: number; y: number } | null>(null);
     const [isClosing, setIsClosing] = useState(false);
     const [avatarLetter, setAvatarLetter] = useState("Y");
+    const [isSignedIn, setIsSignedIn] = useState(false);
     const [voices, setVoices] = useState<VoiceOption[]>([]);
     const [defaultVoiceId, setDefaultVoiceId] = useState<string>("");
     const [popupVoiceId, setPopupVoiceId] = useState<string>("");
@@ -95,39 +97,73 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
         return { year: d.getFullYear(), month: d.getMonth() };
     });
     const [myNotes, setMyNotes] = useState<NoteRecord[]>([]);
+    const [allNotes, setAllNotes] = useState<NoteRecord[]>(() =>
+        Array.isArray(recordings)
+            ? recordings.map((r: { _id?: string; id?: string; text?: string; date?: string; dateDay?: string; emotion?: string }) => ({
+                  _id: r._id ?? r.id ?? "",
+                  text: r.text,
+                  date: r.date,
+                  dateDay: r.dateDay,
+                  emotion: r.emotion,
+              }))
+            : []
+    );
     const [circleFilter, setCircleFilter] = useState<"all" | "week" | "month">("all");
 
     useEffect(() => {
-        const anonId = typeof window !== "undefined" ? localStorage.getItem("anon_id") : null;
-        if (!anonId) {
-            router.push("/login");
-        }
+        if (typeof window === "undefined") return;
+        const userId = localStorage.getItem("user_id");
+        const anonId = localStorage.getItem("anon_id");
+        if (!userId && !anonId) router.push("/login");
+        const hasAuth = !!localStorage.getItem("auth_token");
+        setIsSignedIn(hasAuth);
+        setAvatarLetter(hasAuth ? "U" : "Y");
     }, [router]);
 
-    useEffect(() => {
-        setAvatarLetter(typeof window !== "undefined" && localStorage.getItem("auth_token") ? "U" : "Y");
-    }, []);
+    const handleLogout = () => {
+        if (typeof window === "undefined") return;
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("user_id");
+        setIsSignedIn(false);
+        setAvatarLetter("Y");
+        router.push("/login");
+    };
+
+    const normalizeNote = (n: { id?: string; _id?: string; text?: string; date?: string; dateDay?: string; emotion?: string }): NoteRecord => ({
+        _id: n.id || n._id || "",
+        text: n.text,
+        date: n.date,
+        dateDay: n.dateDay,
+        emotion: n.emotion,
+    });
 
     const fetchMyNotes = () => {
         if (typeof window === "undefined") return;
-        const anonId = localStorage.getItem("anon_id");
-        if (!anonId) return;
-        fetch(`/api/notes?user=${encodeURIComponent(anonId)}`)
+        const userId = localStorage.getItem("user_id") || localStorage.getItem("anon_id");
+        if (!userId) return;
+        fetch(`/api/notes?user=${encodeURIComponent(userId)}`)
             .then((r) => r.json())
             .then((data) => {
                 const list = Array.isArray(data.notes) ? data.notes : [];
-                setMyNotes(list.map((n: { id?: string; _id?: string; text?: string; date?: string; emotion?: string }) => ({
-                    _id: n.id || n._id || "",
-                    text: n.text,
-                    date: n.date,
-                    emotion: n.emotion,
-                })));
+                setMyNotes(list.map(normalizeNote));
             })
             .catch(() => setMyNotes([]));
     };
 
+    const fetchAllNotes = () => {
+        if (typeof window === "undefined") return;
+        fetch("/api/notes")
+            .then((r) => r.json())
+            .then((data) => {
+                const list = Array.isArray(data.notes) ? data.notes : [];
+                setAllNotes(list.map(normalizeNote));
+            })
+            .catch(() => setAllNotes([]));
+    };
+
     useEffect(() => {
         fetchMyNotes();
+        fetchAllNotes();
     }, []);
 
     useEffect(() => {
@@ -226,15 +262,7 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
         generateAndPlayNote();
     }, [selectedNote?._id, popupVoiceId || defaultVoiceId]);
 
-    const allNotesForCircle: NoteRecord[] = Array.isArray(recordings)
-        ? recordings.map((r: any) => ({
-              _id: r._id ?? r.id ?? "",
-              text: r.text,
-              date: r.date,
-              dateDay: r.dateDay,
-              emotion: r.emotion,
-          }))
-        : [];
+    const allNotesForCircle: NoteRecord[] = allNotes;
     const now = new Date();
     const weekAgo = new Date(now);
     weekAgo.setDate(weekAgo.getDate() - 7);
@@ -249,13 +277,18 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
         return true;
     });
 
-    const notesByDate: Record<string, string> = {};
+    const emotionsByDate: Record<string, string[]> = {};
     myNotes.forEach((n: NoteRecord) => {
         const key = n.dateDay ?? n.date?.slice(0, 10);
-        if (key && n.emotion && !notesByDate[key]) notesByDate[key] = n.emotion;
+        if (key && n.emotion) {
+            if (!emotionsByDate[key]) emotionsByDate[key] = [];
+            emotionsByDate[key].push(n.emotion);
+        }
     });
     const todayKey = new Date().toISOString().slice(0, 10);
-    const todayEmotion = notesByDate[todayKey] ?? null;
+    const todayEmotions = emotionsByDate[todayKey] ?? [];
+    const todayLabel = majorityEmotion(todayEmotions);
+    const todayColor = emotionColorsAsGradient(todayEmotions);
     const calendarDays = buildCalendarDays(calendarMonth.year, calendarMonth.month);
     const monthLabel = new Date(calendarMonth.year, calendarMonth.month).toLocaleString("en-US", {
         month: "long",
@@ -300,6 +333,17 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
                         <Link href="/settings" className={homeStyles.headerProfileLink} aria-label="Settings">
                             Settings
                         </Link>
+                        {isSignedIn && (
+                            <button
+                                type="button"
+                                onClick={handleLogout}
+                                className={homeStyles.headerProfileLink}
+                                style={{ background: "none", border: "none", padding: 0, cursor: "pointer", fontFamily: "inherit" }}
+                                aria-label="Log out"
+                            >
+                                Log out
+                            </button>
+                        )}
                     </div>
                 </header>
 
@@ -350,16 +394,17 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
                                         } catch {
                                             /* use Misc if Gemini classification fails */
                                         }
-                                        const anonId = typeof window !== "undefined" ? localStorage.getItem("anon_id") : null;
+                                        const userId = typeof window !== "undefined" ? (localStorage.getItem("user_id") || localStorage.getItem("anon_id")) : null;
                                         const res = await fetch("/api/notes", {
                                             method: "POST",
                                             headers: { "Content-Type": "application/json" },
-                                            body: JSON.stringify({ user: anonId || "anonymous", text, emotion }),
+                                            body: JSON.stringify({ user: userId || "anonymous", text, emotion }),
                                         });
                                         const data = await res.json().catch(() => ({}));
                                         if (!res.ok) throw new Error(data.error || "Failed to post");
                                         setWriteNoteText("");
                                         fetchMyNotes();
+                                        fetchAllNotes();
                                         router.replace(router.asPath);
                                     } catch (err) {
                                         setWriteNoteError(err instanceof Error ? err.message : "Failed to post note");
@@ -572,35 +617,45 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
                                 ))}
                             </div>
                             <div className={settingsStyles.calendarGrid} role="grid">
-                                {calendarDays.map(({ day, dateKey }, i) => (
-                                    <div
-                                        key={i}
-                                        className={settingsStyles.calendarDay}
-                                        data-has-note={dateKey && notesByDate[dateKey] ? "true" : undefined}
-                                        data-emotion={dateKey && notesByDate[dateKey] ? notesByDate[dateKey] : undefined}
-                                        role="gridcell"
-                                    >
-                                        {day > 0 && (
-                                            <>
-                                                {notesByDate[dateKey] && (
-                                                    <span className={settingsStyles.calendarEmotionBg} aria-hidden />
-                                                )}
-                                                <span className={settingsStyles.calendarDayNum}>{day}</span>
-                                            </>
-                                        )}
-                                    </div>
-                                ))}
+                                {calendarDays.map(({ day, dateKey }, i) => {
+                                    const dayEmotions: string[] = dateKey && Array.isArray(emotionsByDate[dateKey]) ? emotionsByDate[dateKey] : [];
+                                    const dayColor = emotionColorsAsGradient(dayEmotions);
+                                    const dayMajority = majorityEmotion(dayEmotions);
+                                    const hasNote = dayEmotions.length > 0;
+                                    return (
+                                        <div
+                                            key={i}
+                                            className={settingsStyles.calendarDay}
+                                            data-has-note={hasNote ? "true" : undefined}
+                                            data-emotion={dayMajority ?? undefined}
+                                            role="gridcell"
+                                        >
+                                            {day > 0 && (
+                                                <>
+                                                    {hasNote && (
+                                                        <span
+                                                            className={settingsStyles.calendarEmotionBg}
+                                                            style={{ background: dayColor }}
+                                                            aria-hidden
+                                                        />
+                                                    )}
+                                                    <span className={settingsStyles.calendarDayNum}>{day}</span>
+                                                </>
+                                            )}
+                                        </div>
+                                    );
+                                })}
                             </div>
                         </section>
                         <section className={homeStyles.emotionForDaySection} aria-label="Your emotion for the day">
                             <h2 className={homeStyles.emotionForDayTitle}>Your emotion for the day</h2>
-                            {todayEmotion ? (
+                            {todayEmotions.length > 0 && todayLabel ? (
                                 <span
                                     className={homeStyles.emotionForDayPill}
-                                    data-emotion={todayEmotion}
-                                    aria-label={`Today's mood: ${todayEmotion}`}
+                                    style={{ background: todayColor }}
+                                    aria-label={`Today's mood: ${todayLabel}`}
                                 >
-                                    {todayEmotion}
+                                    {todayLabel}
                                 </span>
                             ) : (
                                 <p className={homeStyles.emotionForDayEmpty}>
@@ -631,6 +686,8 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
                             <AudioRecorder
                                 onSubmitted={() => {
                                     setShowRecordOverlay(false);
+                                    fetchMyNotes();
+                                    fetchAllNotes();
                                     router.replace(router.asPath);
                                 }}
                             />

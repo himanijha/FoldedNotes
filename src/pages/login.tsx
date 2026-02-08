@@ -5,16 +5,6 @@ import { Fredoka, Nunito } from "next/font/google";
 import styles from "@/styles/Generate.module.css";
 import loginStyles from "@/styles/Login.module.css";
 
-import clientPromise from "../lib/mongodb";
-
-export default async function handler(req, res) {
-    const client = await clientPromise;
-    const db = client.db("myDatabase");
-
-    const notes = await db.collection("notes").find({}).toArray();
-    res.status(200).json(notes);
-}
-
 const fredoka = Fredoka({
     variable: "--font-fredoka",
     subsets: ["latin"],
@@ -86,6 +76,7 @@ export default function Login() {
             const data = res.ok ? await res.json().catch(() => ({})) : null;
             if (res.ok && data?.ok !== false) {
                 if (data?.token) localStorage.setItem("auth_token", data.token);
+                if (data?.userId) localStorage.setItem("user_id", data.userId);
                 router.push("/home");
                 return;
             }
@@ -123,6 +114,7 @@ export default function Login() {
             const data = res.ok ? await res.json().catch(() => ({})) : null;
             if (res.ok && data?.ok !== false) {
                 if (data?.token) localStorage.setItem("auth_token", data.token);
+                if (data?.userId) localStorage.setItem("user_id", data.userId);
                 router.push("/home");
                 return;
             }
