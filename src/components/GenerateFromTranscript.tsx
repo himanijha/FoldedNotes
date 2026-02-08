@@ -226,15 +226,8 @@ export default function GenerateFromTranscript({
         rows={5}
         aria-label="Transcript"
       />
-      {languageCode && (
-        <p className={styles.submittedMeta}>Language: {languageCode}</p>
-      )}
-
       {voices.length > 0 && (
         <>
-          <p className={styles.voiceHint}>
-            Add <code>[chuckle]</code>, <code>[sigh]</code>, <code>[laughter]</code> for sound effects ✨
-          </p>
           <div className={styles.voiceSelects}>
             <label className={styles.voiceLabel}>
               Voice

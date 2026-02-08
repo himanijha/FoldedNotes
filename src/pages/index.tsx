@@ -1,3 +1,5 @@
+"use client";
+
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import { Fredoka, Nunito } from "next/font/google";
@@ -20,7 +22,7 @@ const AudioRecorder = dynamic(
   { ssr: false }
 );
 
-export default function Home() {
+export default function IndexPage() {
   return (
     <>
       <Head>

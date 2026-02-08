@@ -1,29 +1,20 @@
 /* ---------- PAGE ---------- */
 
 .page {
-    --accent: #2d8a7a;
-    --accent-soft: rgba(45, 138, 122, 0.15);
-    --accent-border: rgba(45, 138, 122, 0.35);
-    /* Pride palette */
-    --pride-r: #e86a6a;
-    --pride-o: #f0a050;
-    --pride-y: #f0d050;
-    --pride-g: #50c078;
-    --pride-b: #5090c8;
-    --pride-p: #a060c0;
-    --ink: #1a1a1a;
-    --ink-soft: #5a5a5a;
-    --paper: #ffffff;
-    --paper-notes: #faf8f3;
-    --paper-shadow: rgba(45, 138, 122, 0.12);
     --notes-rings-bar: #a89888;
     --notes-rings-hole: #6a5c52;
     min-height: 100vh;
-    padding: 24px;
-    background: linear-gradient(165deg, #fff0f2, #fff5ed, #fffef5, #f2fff5, #f0f8ff, #f5f0ff, #fff0f2);
+    height: 100vh;
+    width: 100%;
+    max-width: 100vw;
+    padding: 8px 12px;
+    box-sizing: border-box;
+    background: var(--background);
     position: relative;
     overflow: hidden;
     font-family: var(--font-nunito), system-ui, sans-serif;
+    display: flex;
+    flex-direction: column;
 }
 
 /* ---------- RAINBOW ARC ---------- */
@@ -35,9 +26,9 @@
     width: 140%;
     height: 180px;
     transform: translate(-50%, 0);
-    background: linear-gradient( 180deg, transparent 0%, var(--pride-r) 12%, var(--pride-o) 28%, var(--pride-y) 44%, var(--pride-g) 58%, var(--pride-b) 72%, var(--pride-p) 88%, transparent 100% );
-    opacity: 0.18;
-    filter: blur(28px);
+    background: rgba(45, 138, 122, 0.08);
+    opacity: 1;
+    filter: blur(40px);
     pointer-events: none;
     z-index: 0;
 }
@@ -48,8 +39,11 @@
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    max-width: 1100px;
-    margin: 0 auto 32px;
+    width: 100%;
+    max-width: none;
+    margin: 0 0 20px 0;
+    padding: 0 8px;
+    box-sizing: border-box;
 }
 
 .headerDate {
@@ -103,13 +97,23 @@
     color: var(--accent);
     text-decoration: none;
     padding: 6px 12px;
-    border-radius: 10px;
+    border-radius: var(--input-radius);
     transition: background 0.2s ease, color 0.2s ease;
 }
 
 .headerProfileLink:hover {
     background: var(--accent-soft);
     color: #1e6b5e;
+}
+
+.headerCurrent {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--ink);
+    padding: 6px 12px;
+    border-radius: var(--input-radius);
+    cursor: default;
+    pointer-events: none;
 }
 
 /* ---------- HEADER LOGO ---------- */
@@ -143,13 +147,67 @@
 /* ---------- MAIN GRID ---------- */
 
 .mainFull {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 0;
-    max-width: 720px;
-    margin: 0 auto;
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    width: 100%;
+    max-width: 100%;
+    min-height: 0;
+    margin: 0;
     position: relative;
     z-index: 1;
+}
+
+/* ---------- NOTE SIDEBAR (left) – header on top, then note widget with tape ---------- */
+
+.noteSidebar {
+    flex-shrink: 0;
+    width: 280px;
+    padding: 12px 12px 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.noteSidebar .homeColTitle {
+    margin-bottom: 2px;
+}
+
+.noteSidebar .anonymousTagline {
+    margin: 0 0 4px 0;
+}
+
+.noteSidebar .noteSidebarPaper {
+    max-width: 260px;
+}
+
+.noteSidebarPaper {
+    position: relative;
+    width: 100%;
+    max-width: 260px;
+    padding: var(--space-card) 18px 22px;
+    background: linear-gradient(180deg, #faf6f0 0%, #f5f0e0 100%);
+    border: 1px solid rgba(180, 165, 130, 0.2);
+    border-radius: var(--card-radius);
+    box-shadow: var(--card-shadow), var(--card-shadow-border), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    transform: rotate(-0.8deg);
+    box-sizing: border-box;
+}
+
+.noteSidebarTape {
+    position: absolute;
+    top: -4px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-0.8deg);
+    width: 70%;
+    height: 22px;
+    background: rgba(252, 248, 238, 0.95);
+    border: 1px solid rgba(200, 190, 160, 0.3);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    border-radius: 1px;
+    pointer-events: none;
 }
 
 /* ---------- CARDS ---------- */
@@ -158,9 +216,9 @@
 .homeColRecord,
 .homeColFeed {
     background: var(--paper-notes);
-    border-radius: 20px;
-    padding: 24px;
-    box-shadow: 0 4px 0 rgba(0,0,0,0.06), 0 12px 28px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
+    border-radius: var(--card-radius);
+    padding: var(--space-section);
+    box-shadow: var(--card-shadow), var(--card-shadow-border);
     min-height: 75vh;
     max-height: 75vh;
     overflow-y: auto;
@@ -211,26 +269,377 @@
         height: 0px;
     }
 
-/* Notes section: no box, sits on page background */
+/* Notes section: right side (feed + record only) */
 .homeColNotesWithFilters {
     display: flex;
     flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
     background: transparent;
     border-radius: 0;
-    padding: 24px 16px 100px;
+    padding: 8px 12px 72px;
     box-shadow: none;
     border: none;
-    min-height: 70vh;
-    max-height: none;
     overflow-y: auto;
     text-align: left;
     position: relative;
     z-index: 2;
+    box-sizing: border-box;
 }
 
 .homeColNotesWithFilters .homeColTitle {
     flex-shrink: 0;
     margin-bottom: 4px;
+}
+
+.homeCalendarColumn {
+    flex-shrink: 0;
+    width: 320px;
+    max-width: 100%;
+    padding: 8px 0 72px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-section);
+    min-width: 0;
+}
+
+.emotionForDaySection {
+    width: 100%;
+    background: var(--card-bg);
+    border-radius: var(--card-radius);
+    padding: var(--space-card);
+    box-shadow: var(--card-shadow), var(--card-shadow-border);
+}
+
+.emotionForDayTitle {
+    font-family: var(--font-fredoka), system-ui, sans-serif;
+    font-size: var(--section-title-size);
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0 0 12px 0;
+}
+
+.emotionForDayPill {
+    display: inline-block;
+    font-family: var(--font-fredoka), system-ui, sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 8px 18px;
+    border-radius: 999px;
+    color: rgba(255, 255, 255, 0.95);
+    letter-spacing: 0.02em;
+}
+
+.emotionForDayPill[data-emotion="Happy"] { background: #c9a028; }
+.emotionForDayPill[data-emotion="Sad"] { background: #4a7a98; }
+.emotionForDayPill[data-emotion="Angry"] { background: #b85a52; }
+.emotionForDayPill[data-emotion="Anxious"] { background: #c48848; }
+.emotionForDayPill[data-emotion="Fear"] { background: #7a6a9a; }
+.emotionForDayPill[data-emotion="Surprise"] { background: #5a9a7a; }
+.emotionForDayPill[data-emotion="Love/Warmth"] { background: #b86a82; }
+.emotionForDayPill[data-emotion="Misc"] { background: #8a8a92; }
+
+.emotionForDayEmpty {
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.myNotesSection {
+    width: 100%;
+    background: var(--card-bg);
+    border-radius: var(--card-radius);
+    padding: var(--space-card) var(--space-card) var(--space-section);
+    box-shadow: var(--card-shadow), var(--card-shadow-border);
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 120px;
+    overflow: hidden;
+}
+
+.myNotesTitle {
+    font-family: var(--font-fredoka), system-ui, sans-serif;
+    font-size: var(--section-title-size);
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0 0 12px 0;
+    flex-shrink: 0;
+}
+
+.myNotesEmpty {
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.myNotesList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex: 1 1 auto;
+    -webkit-overflow-scrolling: touch;
+    padding-right: 4px;
+}
+
+.myNotesList::-webkit-scrollbar {
+    width: 6px;
+}
+
+.myNotesList::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 3px;
+}
+
+/* Note card: paper look with emotion color + tape */
+.myNotesItem {
+    position: relative;
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 14px 12px 14px;
+    padding-top: 20px;
+    border-radius: 2px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+    cursor: pointer;
+    transition: box-shadow 0.2s ease, transform 0.15s ease;
+    font-family: var(--font-nunito), system-ui, sans-serif;
+}
+
+.myNotesItem:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+    transform: translateY(-1px);
+}
+
+/* Tape strip at top */
+.myNotesItemTape {
+    position: absolute;
+    top: -2px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-1.5deg);
+    width: 72%;
+    height: 22px;
+    background: rgba(252, 248, 238, 0.92);
+    border: 1px solid rgba(200, 190, 165, 0.35);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    pointer-events: none;
+}
+
+/* Emotion-colored paper (soft tint) */
+.myNotesItem[data-emotion="Happy"] {
+    background: linear-gradient(180deg, rgba(201, 160, 40, 0.18) 0%, rgba(255, 250, 235, 0.95) 100%);
+}
+
+.myNotesItem[data-emotion="Sad"] {
+    background: linear-gradient(180deg, rgba(74, 122, 152, 0.18) 0%, rgba(240, 248, 252, 0.95) 100%);
+}
+
+.myNotesItem[data-emotion="Angry"] {
+    background: linear-gradient(180deg, rgba(184, 90, 82, 0.18) 0%, rgba(255, 242, 240, 0.95) 100%);
+}
+
+.myNotesItem[data-emotion="Anxious"] {
+    background: linear-gradient(180deg, rgba(196, 136, 72, 0.18) 0%, rgba(255, 248, 238, 0.95) 100%);
+}
+
+.myNotesItem[data-emotion="Fear"] {
+    background: linear-gradient(180deg, rgba(122, 106, 154, 0.18) 0%, rgba(248, 246, 252, 0.95) 100%);
+}
+
+.myNotesItem[data-emotion="Surprise"] {
+    background: linear-gradient(180deg, rgba(90, 154, 122, 0.18) 0%, rgba(238, 252, 245, 0.95) 100%);
+}
+
+.myNotesItem[data-emotion="Love/Warmth"] {
+    background: linear-gradient(180deg, rgba(184, 106, 130, 0.18) 0%, rgba(255, 242, 248, 0.95) 100%);
+}
+
+.myNotesItem[data-emotion="Misc"] {
+    background: linear-gradient(180deg, rgba(138, 138, 146, 0.12) 0%, rgba(250, 250, 252, 0.95) 100%);
+}
+
+.myNotesItemPreview {
+    display: block;
+    font-size: 0.88rem;
+    color: var(--ink);
+    line-height: 1.35;
+    margin-bottom: 4px;
+}
+
+.myNotesItemDate {
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+}
+
+.circleFilterSection {
+    width: 100%;
+    background: var(--card-bg);
+    border-radius: var(--card-radius);
+    padding: var(--space-card);
+    box-shadow: var(--card-shadow), var(--card-shadow-border);
+}
+
+.circleFilterTitleRow {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.circleFilterLabel {
+    font-family: var(--font-fredoka), system-ui, sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.circleFilterClearLink {
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: var(--font-nunito), system-ui, sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    text-decoration: underline;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.circleFilterClearLink:hover:not(:disabled) {
+    color: var(--ink);
+}
+
+.circleFilterClearLink:disabled {
+    opacity: 0.5;
+    cursor: default;
+    text-decoration: none;
+}
+
+.circleFilterRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.circleFilterDropdownWrap {
+    position: relative;
+}
+
+.circleFilterDropdownBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: var(--input-radius);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.8);
+    font-family: var(--font-nunito), system-ui, sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    min-width: 120px;
+    justify-content: space-between;
+}
+
+.circleFilterDropdownBtn:hover {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: var(--accent-border);
+}
+
+.circleFilterDropdownChevron {
+    font-size: 0.65rem;
+    opacity: 0.7;
+}
+
+.circleFilterDropdownPanel {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 4px;
+    padding: 8px;
+    background: var(--card-bg);
+    border-radius: var(--input-radius);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.06);
+    z-index: 100;
+    min-width: 160px;
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.circleFilterDropdownOption {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: var(--font-nunito), system-ui, sans-serif;
+    font-size: 0.88rem;
+    color: var(--ink);
+}
+
+.circleFilterDropdownOption:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.circleFilterDropdownOption input {
+    margin: 0;
+}
+
+.circleFilterTimeSelect {
+    padding: 8px 12px;
+    border-radius: var(--input-radius);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.8);
+    font-family: var(--font-nunito), system-ui, sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    min-width: 120px;
+}
+
+.circleFilterTimeSelect:hover {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: var(--accent-border);
+}
+
+.circleFilterBtn,
+.circleFilterActive {
+    padding: 8px 14px;
+    border-radius: var(--input-radius);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.6);
+    font-family: var(--font-nunito), system-ui, sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.circleFilterBtn:hover {
+    color: var(--ink);
+    background: rgba(255, 255, 255, 0.9);
+    border-color: var(--accent-border);
+}
+
+.circleFilterActive {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-color: var(--accent-border);
 }
 
 .anonymousTagline {
@@ -240,12 +649,88 @@
     flex-shrink: 0;
 }
 
+/* Write a note – inside note sidebar (note aesthetic) */
+.noteSidebarPaper .writeNoteLabel {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 10px;
+    letter-spacing: 0.02em;
+}
+
+.noteSidebarPaper .writeNoteInput {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px 10px;
+    font-family: var(--font-nunito), system-ui, sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--ink);
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: var(--input-radius);
+    resize: vertical;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.noteSidebarPaper .writeNoteInput::placeholder {
+    color: var(--ink-soft);
+    opacity: 0.8;
+}
+
+.noteSidebarPaper .writeNoteInput:focus {
+    outline: none;
+    border-color: rgba(45, 138, 122, 0.5);
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.noteSidebarPaper .writeNoteInput:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.noteSidebarPaper .writeNoteError {
+    font-size: 0.82rem;
+    color: #a05248;
+    margin: 8px 0 0 0;
+}
+
+.noteSidebarPaper .writeNotePost {
+    margin-top: 14px;
+    padding: 10px 16px;
+    font-family: var(--font-nunito), system-ui, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #fff;
+    background: var(--accent);
+    border: none;
+    border-radius: var(--btn-radius);
+    cursor: pointer;
+    box-shadow: var(--card-shadow);
+    transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.noteSidebarPaper .writeNotePost:hover:not(:disabled) {
+    background: #247a6b;
+}
+
+.noteSidebarPaper .writeNotePost:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.noteSidebarPaper .writeNotePost:disabled {
+    cursor: not-allowed;
+    /* Keep same dark green at all times – no opacity/color change */
+}
+
 .headerProfile .anonymousBadge {
     font-size: 0.8rem;
     font-weight: 600;
     color: var(--ink-soft);
     padding: 6px 10px;
-    border-radius: 10px;
+    border-radius: var(--input-radius);
     background: rgba(0, 0, 0, 0.05);
     border: 1px solid rgba(0, 0, 0, 0.08);
 }
@@ -304,16 +789,128 @@
     color: var(--ink);
 }
 
-/* Moodboard: circular bubbles, organic layout */
+/* Wrapper: center record button + cluster of note bubbles */
+/* Shared drop shadow: same prominent shadow for mic + note circles */
+.feedAndRecord {
+    position: relative;
+    min-height: 600px;
+    flex: 1;
+    --circle-shadow: 0 5px 0 rgba(0, 0, 0, 0.1), 0 14px 28px rgba(0, 0, 0, 0.15);
+}
+
+/* Record FAB: teal hero in the center */
+
+.feedAndRecord .recordFab {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 88px;
+    height: 88px;
+    z-index: 10;
+    background: #2d8a7a;
+    box-shadow: var(--circle-shadow);
+}
+
+.feedAndRecord .recordFab:hover {
+    transform: translate(-50%, -50%) scale(1.06);
+    box-shadow: 0 5px 0 rgba(0, 0, 0, 0.06), 0 14px 28px rgba(0, 0, 0, 0.14);
+}
+
+.feedAndRecord .recordFab:active {
+    transform: translate(-50%, -50%) scale(0.98);
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.08), 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.feedAndRecord .recordFabIcon {
+    width: 36px;
+    height: 36px;
+}
+
+/* Empty state: below record button */
+.feedAndRecord .feedEmpty {
+    position: absolute;
+    top: 60%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 85%;
+    max-width: 280px;
+    margin: 0;
+    padding: 16px;
+}
+
+/* Circular ring of note circles */
+.feedAndRecord .feedList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.feedAndRecord .feedList > li {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 104px;
+    height: 104px;
+    margin-left: -52px;
+    margin-top: -52px;
+    pointer-events: auto;
+    transform: translate(var(--cluster-x, 0), var(--cluster-y, 0));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.feedAndRecord .feedList > li .feedCard {
+    transform: none;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, outline 0.2s ease;
+}
+
+.feedAndRecord .feedList > li .feedCard:hover {
+    transform: scale(1.12);
+    z-index: 999;
+    box-shadow: 0 6px 0 rgba(0, 0, 0, 0.08), 0 18px 36px rgba(0, 0, 0, 0.18);
+    border-color: rgba(255, 255, 255, 0.9);
+}
+
+.feedAndRecord .feedList > li .feedCard:active {
+    transform: scale(1.02);
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1), 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.feedAndRecord .feedList > li .feedCard:focus-visible {
+    outline: 3px solid rgba(255, 255, 255, 0.9);
+    outline-offset: 3px;
+    z-index: 999;
+}
+
+/* Force same shadow as mic on all note circles in the ring */
+.feedAndRecord .feedList .feedCard,
+.feedAndRecord .feedList .feedCard[data-emotion] {
+    box-shadow: var(--circle-shadow);
+}
+
+.feedCardGrayed,
+.feedCard[data-filtered-out="true"] {
+    opacity: 0.35;
+    filter: grayscale(0.85);
+    pointer-events: auto;
+}
+
+/* Moodboard: circular bubbles (grid fallback when not in feedAndRecord) */
 .feedList {
     list-style: none;
-    padding: 16px 8px;
+    padding: 16px 12px;
     margin: 0;
     display: flex;
     flex-wrap: wrap;
-    align-content: center;
+    align-content: flex-start;
     justify-content: center;
-    gap: 18px 22px;
+    gap: 20px 24px;
     overflow-y: auto;
     flex: 1;
     padding-right: 4px;
@@ -332,68 +929,79 @@
     flex: 0 0 auto;
 }
 
-/* Circular bubbles – three sizes for organic feel */
+/* Circular bubbles – single size, same shadow as mic */
+.feedAndRecord .feedList .feedCard,
 .feedCard {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 100px;
-    height: 100px;
+    width: 88px;
+    height: 88px;
     border-radius: 50%;
     padding: 12px;
-    border: none;
-    background: rgba(255, 255, 255, 0.92);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: var(--circle-shadow, 0 6px 16px rgba(0, 0, 0, 0.12));
     text-align: center;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, outline 0.2s ease;
     overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .feedCard:hover {
-    transform: scale(1.06);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.06);
+    transform: scale(1.12);
+    box-shadow: 0 6px 0 rgba(0, 0, 0, 0.08), 0 18px 36px rgba(0, 0, 0, 0.18);
+    border-color: rgba(255, 255, 255, 0.9);
+}
+
+.feedCard:active {
+    transform: scale(1.02);
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1), 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.feedCard:focus-visible {
+    outline: 3px solid rgba(255, 255, 255, 0.9);
+    outline-offset: 3px;
 }
 
 .feedCard[data-size="medium"] {
-    width: 120px;
-    height: 120px;
+    width: 88px;
+    height: 88px;
+    padding: 12px;
 }
 
 .feedCard[data-size="large"] {
-    width: 150px;
-    height: 150px;
-    padding: 16px;
+    width: 88px;
+    height: 88px;
+    padding: 12px;
 }
 
-/* Slight rotation for organic clustering */
-.feedList > li:nth-child(3n + 1) .feedCard {
-    transform: rotate(-3deg);
+/* Envelope icon – theme colors, thicker border, lighter inside */
+.feedCardEnvelope {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
 }
 
-.feedList > li:nth-child(3n + 2) .feedCard {
-    transform: rotate(2deg);
+.feedCardEnvelope svg {
+    width: 44%;
+    height: 44%;
+    max-width: 38px;
+    max-height: 38px;
+    color: #fff;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15));
 }
 
-.feedList > li:nth-child(3n) .feedCard {
-    transform: rotate(1deg);
-}
-
-.feedList > li .feedCard:hover {
-    transform: scale(1.06) rotate(0deg);
-}
-
-.feedList > li:nth-child(3n + 1) .feedCard:hover {
-    transform: scale(1.06) rotate(-3deg);
-}
-
-.feedList > li:nth-child(3n + 2) .feedCard:hover {
-    transform: scale(1.06) rotate(2deg);
-}
-
-.feedList > li:nth-child(3n) .feedCard:hover {
-    transform: scale(1.06) rotate(1deg);
+.feedCard[data-size="medium"] .feedCardEnvelope svg,
+.feedCard[data-size="large"] .feedCardEnvelope svg {
+    width: 44%;
+    height: 44%;
+    max-width: 38px;
+    max-height: 38px;
 }
 
 .feedCardMeta {
@@ -445,48 +1053,120 @@
     line-clamp: 4;
 }
 
-/* Pastel emotion tints for moodboard circles */
+/* Emotion colors – solid palette (no gradients) */
 .feedCard[data-emotion="Happy"] {
-    background: linear-gradient(145deg, rgba(255, 250, 205, 0.98), rgba(255, 238, 185, 0.95));
+    border-color: rgba(255, 255, 255, 0.4);
+    background: #c9a028;
+    box-shadow: var(--circle-shadow, 0 6px 16px rgba(0, 0, 0, 0.12));
+    --envelope-stroke: #fff;
+    --envelope-fill: #fffef0;
+}
+.feedAndRecord .feedList .feedCard[data-emotion="Happy"] {
+    box-shadow: var(--circle-shadow);
+    background: #c9a028;
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 .feedCard[data-emotion="Sad"] {
-    background: linear-gradient(145deg, rgba(230, 242, 255, 0.98), rgba(210, 230, 255, 0.95));
+    border-color: rgba(255, 255, 255, 0.4);
+    background: #4a7a98;
+    box-shadow: var(--circle-shadow, 0 6px 16px rgba(0, 0, 0, 0.12));
+    --envelope-stroke: #fff;
+    --envelope-fill: #f0f8ff;
+}
+.feedAndRecord .feedList .feedCard[data-emotion="Sad"] {
+    box-shadow: var(--circle-shadow);
+    background: #4a7a98;
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 .feedCard[data-emotion="Angry"] {
-    background: linear-gradient(145deg, rgba(255, 235, 235, 0.98), rgba(255, 218, 218, 0.95));
+    border-color: rgba(255, 255, 255, 0.35);
+    background: #b85a52;
+    box-shadow: var(--circle-shadow, 0 6px 16px rgba(0, 0, 0, 0.12));
+    --envelope-stroke: #fff;
+    --envelope-fill: #fff5f5;
+}
+.feedAndRecord .feedList .feedCard[data-emotion="Angry"] {
+    box-shadow: var(--circle-shadow);
+    background: #b85a52;
+    border-color: rgba(255, 255, 255, 0.35);
 }
 
 .feedCard[data-emotion="Anxious"] {
-    background: linear-gradient(145deg, rgba(255, 248, 225, 0.98), rgba(255, 238, 210, 0.95));
+    border-color: rgba(255, 255, 255, 0.4);
+    background: #c48848;
+    box-shadow: var(--circle-shadow, 0 6px 16px rgba(0, 0, 0, 0.12));
+    --envelope-stroke: #fff;
+    --envelope-fill: #fff8f0;
+}
+.feedAndRecord .feedList .feedCard[data-emotion="Anxious"] {
+    box-shadow: var(--circle-shadow);
+    background: #c48848;
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 .feedCard[data-emotion="Fear"] {
-    background: linear-gradient(145deg, rgba(242, 238, 255, 0.98), rgba(228, 218, 248, 0.95));
+    border-color: rgba(255, 255, 255, 0.35);
+    background: #7a6a9a;
+    box-shadow: var(--circle-shadow, 0 6px 16px rgba(0, 0, 0, 0.12));
+    --envelope-stroke: #fff;
+    --envelope-fill: #f5f0ff;
+}
+.feedAndRecord .feedList .feedCard[data-emotion="Fear"] {
+    box-shadow: var(--circle-shadow);
+    background: #7a6a9a;
+    border-color: rgba(255, 255, 255, 0.35);
 }
 
 .feedCard[data-emotion="Surprise"] {
-    background: linear-gradient(145deg, rgba(255, 238, 248, 0.98), rgba(255, 222, 235, 0.95));
+    border-color: rgba(255, 255, 255, 0.45);
+    background: #5a9a7a;
+    box-shadow: var(--circle-shadow, 0 6px 16px rgba(0, 0, 0, 0.12));
+    --envelope-stroke: #fff;
+    --envelope-fill: #f0fff5;
+}
+.feedAndRecord .feedList .feedCard[data-emotion="Surprise"] {
+    box-shadow: var(--circle-shadow);
+    background: #5a9a7a;
+    border-color: rgba(255, 255, 255, 0.45);
 }
 
 .feedCard[data-emotion="Love/Warmth"] {
-    background: linear-gradient(145deg, rgba(255, 238, 245, 0.98), rgba(255, 228, 238, 0.95));
+    border-color: rgba(255, 255, 255, 0.4);
+    background: #b86a82;
+    box-shadow: var(--circle-shadow, 0 6px 16px rgba(0, 0, 0, 0.12));
+    --envelope-stroke: #fff;
+    --envelope-fill: #fce4ec;
+}
+.feedAndRecord .feedList .feedCard[data-emotion="Love/Warmth"] {
+    box-shadow: var(--circle-shadow);
+    background: #b86a82;
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 .feedCard[data-emotion="Misc"] {
-    background: linear-gradient(145deg, rgba(252, 252, 254, 0.98), rgba(245, 245, 250, 0.95));
+    border-color: rgba(255, 255, 255, 0.5);
+    background: #8a8a92;
+    box-shadow: var(--circle-shadow, 0 6px 16px rgba(0, 0, 0, 0.12));
+    --envelope-stroke: #fff;
+    --envelope-fill: #f5f5f8;
+}
+.feedAndRecord .feedList .feedCard[data-emotion="Misc"] {
+    box-shadow: var(--circle-shadow);
+    background: #8a8a92;
+    border-color: rgba(255, 255, 255, 0.5);
 }
 
 .feedEmpty {
     text-align: center;
-    padding: 48px 24px;
+    padding: 24px 16px;
     color: var(--ink-soft);
     font-size: 0.95rem;
     line-height: 1.5;
 }
 
-/* Record FAB (bottom right) */
+/* Record FAB (bottom center, doesn’t cover notes) */
 .recordFab {
     position: fixed;
     bottom: 28px;
@@ -526,7 +1206,8 @@
 
 .homeColTitle {
     font-family: var(--font-fredoka), system-ui, sans-serif;
-    font-size: 1.1rem;
+    font-size: var(--section-title-size);
+    font-weight: 600;
     margin-bottom: 16px;
     color: var(--ink);
 }
@@ -678,11 +1359,463 @@
         background: #c94d4d;
     }
 
+/* ---------- NOTE POPUP (circle flips & morphs from bubble) ---------- */
+
+/* Record overlay: tap mic to record inline */
+.recordOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+.recordOverlayClose {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    color: #555;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.recordOverlayClose:hover {
+    background: #fff;
+    color: #222;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.recordOverlayContent {
+    background: var(--paper-notes, #faf8f3);
+    border-radius: 24px;
+    padding: 32px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+.notePopupOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 24px;
+    box-sizing: border-box;
+    perspective: 1400px;
+    transition: opacity 0.35s ease;
+}
+
+.notePopupOverlayClosing {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.notePopupCard {
+    background: var(--paper-notes, #faf8f3);
+    border-radius: 24px;
+    padding: 28px 24px 24px;
+    width: 100%;
+    max-width: 440px;
+    max-height: 85vh;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.06);
+    animation: notePopupFlipIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    transform-style: preserve-3d;
+    backface-visibility: visible;
+    --bubble-dx: 0px;
+    --bubble-dy: 0px;
+}
+
+/* Popup card reflects emotion (same tints as feed bubbles) */
+.notePopupCard[data-emotion="Happy"] {
+    background: linear-gradient(160deg, rgba(255, 252, 225, 0.98) 0%, rgba(255, 242, 195, 0.96) 100%);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(201, 148, 32, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+.notePopupCard[data-emotion="Sad"] {
+    background: linear-gradient(160deg, rgba(235, 248, 255, 0.98) 0%, rgba(218, 235, 255, 0.96) 100%);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(74, 123, 167, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+.notePopupCard[data-emotion="Angry"] {
+    background: linear-gradient(160deg, rgba(255, 235, 238, 0.98) 0%, rgba(255, 205, 210, 0.96) 100%);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(183, 28, 28, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+.notePopupCard[data-emotion="Anxious"] {
+    background: linear-gradient(160deg, rgba(255, 250, 235, 0.98) 0%, rgba(255, 242, 218, 0.96) 100%);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(184, 120, 56, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+.notePopupCard[data-emotion="Fear"] {
+    background: linear-gradient(160deg, rgba(248, 245, 255, 0.98) 0%, rgba(235, 228, 250, 0.96) 100%);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(107, 91, 142, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+.notePopupCard[data-emotion="Surprise"] {
+    background: linear-gradient(160deg, rgba(240, 255, 248, 0.98) 0%, rgba(224, 255, 240, 0.96) 100%);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(80, 192, 120, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+.notePopupCard[data-emotion="Love/Warmth"] {
+    background: linear-gradient(160deg, rgba(252, 228, 236, 0.98) 0%, rgba(248, 187, 208, 0.96) 100%);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(194, 24, 91, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+.notePopupCard[data-emotion="Misc"] {
+    background: linear-gradient(160deg, rgba(252, 252, 255, 0.98) 0%, rgba(248, 248, 252, 0.96) 100%);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+.notePopupCardClosing {
+    animation: notePopupFlipOut 0.4s cubic-bezier(0.55, 0.06, 0.68, 0.19) forwards;
+}
+
+/* Start at click (bubble), morph to center */
+@keyframes notePopupFlipIn {
+    from {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--bubble-dx)), calc(-50% + var(--bubble-dy))) scale(0.18) rotateY(-92deg);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1) rotateY(0);
+    }
+}
+
+/* Shrink back to click (bubble) */
+@keyframes notePopupFlipOut {
+    from {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1) rotateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--bubble-dx)), calc(-50% + var(--bubble-dy))) scale(0.18) rotateY(88deg);
+    }
+}
+
+.notePopupClose {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    background: rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 50%;
+    color: #555;
+    font-size: 20px;
+    font-weight: 400;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.notePopupClose:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: #222;
+    border-color: rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.notePopupHeader {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.notePopupHeader .notePopupClose {
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+/* Emotion as title tag at top of popup (centered) */
+.notePopupTitleTag {
+    display: inline-block;
+    font-family: var(--font-fredoka), system-ui, sans-serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    padding: 10px 22px;
+    margin: 0;
+    border-radius: 999px;
+    color: #fff;
+    border: none;
+    letter-spacing: 0.02em;
+}
+
+.notePopupTitleTag[data-emotion="Happy"] { background: #b8860b; }
+.notePopupTitleTag[data-emotion="Sad"] { background: #4a7ba7; }
+.notePopupTitleTag[data-emotion="Angry"] { background: #c62828; }
+.notePopupTitleTag[data-emotion="Anxious"] { background: #b87838; }
+.notePopupTitleTag[data-emotion="Fear"] { background: #6b5b8e; }
+.notePopupTitleTag[data-emotion="Surprise"] { background: #50c078; }
+.notePopupTitleTag[data-emotion="Love/Warmth"] { background: #d81b60; }
+
+.notePopupTagline {
+    font-size: 0.95rem;
+    color: var(--ink-soft);
+    margin: 0 0 16px 0;
+    text-align: center;
+}
+
+.notePopupScroll {
+    overflow-y: auto;
+    max-height: min(280px, 40vh);
+    margin-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.notePopupLabel {
+    font-family: var(--font-fredoka), system-ui, sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0 0 8px 0;
+}
+
+.notePopupTextBlock {
+    width: 100%;
+    min-height: 80px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    font-family: var(--font-nunito), system-ui, sans-serif;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--ink);
+    background: #fff;
+    border: 2px dashed rgba(45, 138, 122, 0.35);
+    border-radius: 14px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    box-sizing: border-box;
+}
+
+.notePopupMeta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.notePopupDate {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+}
+
+.notePopupEmotion {
+    font-size: 0.8rem;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border: 1px solid var(--accent-border);
+}
+
+/* Emotion pill: show emotion color (background + border) */
+.notePopupEmotion[data-emotion="Happy"] {
+    background: #b8860b;
+    color: #fff;
+    border-color: #9a7209;
+}
+.notePopupEmotion[data-emotion="Sad"] {
+    background: #4a7ba7;
+    color: #fff;
+    border-color: #3d6690;
+}
+.notePopupEmotion[data-emotion="Angry"] {
+    background: #c62828;
+    color: #fff;
+    border-color: #b71c1c;
+}
+.notePopupEmotion[data-emotion="Anxious"] {
+    background: #b87838;
+    color: #fff;
+    border-color: #9c652f;
+}
+.notePopupEmotion[data-emotion="Fear"] {
+    background: #6b5b8e;
+    color: #fff;
+    border-color: #5a4c78;
+}
+.notePopupEmotion[data-emotion="Surprise"] {
+    background: #50c078;
+    color: #fff;
+    border-color: #38a868;
+}
+.notePopupEmotion[data-emotion="Love/Warmth"] {
+    background: #d81b60;
+    color: #fff;
+    border-color: #c2185b;
+}
+
+.notePopupVoiceRow {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+.notePopupVoiceLabel {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.notePopupVoiceWrap {
+    position: relative;
+}
+
+.notePopupVoiceButton {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 12px 14px;
+    font-family: var(--font-nunito), system-ui, sans-serif;
+    font-size: 0.95rem;
+    color: var(--ink);
+    background: #fff;
+    border: 1px solid rgba(45, 138, 122, 0.4);
+    border-radius: 12px;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.notePopupVoiceButton:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.notePopupVoiceChevron {
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    margin-left: 8px;
+}
+
+.notePopupVoiceList {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin: 4px 0 0;
+    padding: 6px;
+    list-style: none;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 9998;
+}
+
+.notePopupVoiceOption {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    font-family: var(--font-nunito), system-ui, sans-serif;
+    font-size: 0.9rem;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s ease;
+}
+
+.notePopupVoiceOption:hover {
+    background: var(--accent-soft);
+}
+
+.notePopupGenerating {
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+    margin: 0 0 12px 0;
+}
+
+.notePopupAudio {
+    margin-top: 20px;
+    padding: 14px 16px;
+    background: #fff;
+    border: 1px solid rgba(45, 138, 122, 0.4);
+    border-radius: 12px;
+    box-sizing: border-box;
+}
+
+.notePopupAudioLabel {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0 0 10px 0;
+}
+
+.notePopupAudio audio {
+    width: 100%;
+    height: 48px;
+    border-radius: 10px;
+    background: transparent;
+}
+
+/* Match native audio controls to popup style where supported */
+.notePopupAudio audio::-webkit-media-controls-panel {
+    background: transparent;
+}
+.notePopupAudio audio::-webkit-media-controls-enclosure {
+    border-radius: 10px;
+    background: var(--accent-soft);
+}
+
 /* ---------- MOBILE ---------- */
 
 @media (max-width: 900px) {
     .mainFull {
-        grid-template-columns: 1fr;
+        flex-direction: column;
+    }
+
+    .noteSidebar {
+        width: 100%;
+        padding: 10px 12px 16px;
+    }
+
+    .noteSidebar .noteSidebarPaper {
+        max-width: 100%;
+    }
+
+    .noteSidebarPaper {
+        transform: rotate(-0.4deg);
+    }
+
+    .noteSidebarTape {
+        transform: translateX(-50%) rotate(-0.4deg);
     }
 
     .homeColRecordings,
@@ -691,6 +1824,13 @@
     .homeColNotesWithFilters {
         min-height: 40vh;
         max-height: none;
+    }
+
+    .homeCalendarColumn {
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 8px 12px 24px;
     }
 
     .headerLogo {
@@ -735,5 +1875,56 @@
     .recordFabIcon {
         width: 22px;
         height: 22px;
+    }
+
+    .feedAndRecord .recordFab {
+        top: 50%;
+        left: 50%;
+        bottom: auto;
+        transform: translate(-50%, -50%);
+        width: 72px;
+        height: 72px;
+    }
+
+    .feedAndRecord .recordFab:hover {
+        transform: translate(-50%, -50%) scale(1.05);
+    }
+
+    .feedAndRecord .recordFab:active {
+        transform: translate(-50%, -50%) scale(0.98);
+    }
+
+    .feedAndRecord .recordFabIcon {
+        width: 28px;
+        height: 28px;
+    }
+
+    .feedAndRecord {
+        min-height: 400px;
+    }
+
+    .feedAndRecord .feedList > li {
+        margin-left: -44px;
+        margin-top: -44px;
+        width: 88px;
+        height: 88px;
+        transform: translate(calc(var(--cluster-x, 0) * 0.82), calc(var(--cluster-y, 0) * 0.82));
+    }
+
+    .feedAndRecord .feedList > li .feedCard,
+    .feedAndRecord .feedList > li .feedCard[data-size="small"],
+    .feedAndRecord .feedList > li .feedCard[data-size="medium"],
+    .feedAndRecord .feedList > li .feedCard[data-size="large"] {
+        width: 72px;
+        height: 72px;
+        padding: 10px;
+    }
+
+    .feedAndRecord .feedList > li .feedCard:hover {
+        transform: scale(1.15);
+    }
+
+    .feedAndRecord .feedList > li .feedCard:active {
+        transform: scale(1.03);
     }
 }

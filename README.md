@@ -4,6 +4,10 @@ Platform that people can call and leave anonymous message of hope, tips and any 
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
 
+## Requirements (GitHub)
+
+- **Side notes panel:** Allow users to write notes in a side panel and post them to the feed. (Implemented: "Write a note" section on the home page posts to the same notes feed via `POST /api/notes`.)
+
 ## Getting Started
 
 ### 1. Install and run
