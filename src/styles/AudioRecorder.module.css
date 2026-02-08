@@ -1,5 +1,180 @@
 .wrapper {
   width: 100%;
+  position: relative;
+}
+
+/* Bottle-in-ocean sending overlay – warm, hopeful */
+.sendingOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 28%;
+  background: linear-gradient(180deg, #ffecd2 0%, #fcb69f 25%, #a8edea 55%, #5bc4c4 80%, #2e9ba3 100%);
+  animation: sendingFadeIn 0.4s ease-out;
+}
+
+@keyframes sendingFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.sendingOcean {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.sendingSun {
+  position: absolute;
+  top: 18%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #fff9e6, #ffd93d 40%, #f4b942 70%, #e8a838 100%);
+  box-shadow: 0 0 50px rgba(255, 217, 61, 0.5), 0 0 100px rgba(255, 200, 80, 0.25);
+  animation: sunGlow 3s ease-in-out infinite;
+}
+
+@keyframes sunGlow {
+  0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
+  50% { opacity: 0.95; transform: translateX(-50%) scale(1.05); }
+}
+
+.sendingWaves,
+.sendingWaves2 {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  bottom: 0;
+  height: 120px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath fill='%23ffffff' fill-opacity='0.2' d='M0 60 Q300 20 600 60 T1200 60 V120 H0 Z'/%3E%3Cpath fill='%23ffffff' fill-opacity='0.1' d='M0 80 Q300 40 600 80 T1200 80 V120 H0 Z'/%3E%3C/svg%3E") repeat-x;
+  background-size: 600px 120px;
+  animation: waveMove 4s ease-in-out infinite;
+}
+
+.sendingWaves2 {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath fill='%23ffffff' fill-opacity='0.15' d='M0 70 Q400 30 800 70 T1600 70 V120 H0 Z'/%3E%3C/svg%3E") repeat-x;
+  background-size: 600px 120px;
+  animation: waveMove 5s ease-in-out infinite reverse;
+  animation-delay: -1s;
+}
+
+@keyframes waveMove {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-150px);
+  }
+}
+
+.sendingBottle {
+  position: absolute;
+  left: 18%;
+  bottom: 22%;
+  width: 28px;
+  height: 48px;
+  animation: bottleSail 12s ease-in-out forwards;
+}
+
+@keyframes bottleSail {
+  0% {
+    left: 18%;
+    transform: translateY(0) rotate(-2deg);
+    opacity: 1;
+  }
+  15% {
+    left: 28%;
+    transform: translateY(-5px) rotate(2deg);
+    opacity: 1;
+  }
+  30% {
+    left: 38%;
+    transform: translateY(0) rotate(-2deg);
+    opacity: 1;
+  }
+  45% {
+    left: 50%;
+    transform: translateY(-5px) rotate(2deg);
+    opacity: 1;
+  }
+  60% {
+    left: 60%;
+    transform: translateY(0) rotate(-2deg);
+    opacity: 1;
+  }
+  75% {
+    left: 72%;
+    transform: translateY(-4px) rotate(1deg);
+    opacity: 1;
+  }
+  90% {
+    left: 80%;
+    transform: translateY(-2px) rotate(0deg) scale(0.88);
+    opacity: 0.95;
+  }
+  100% {
+    left: 85%;
+    transform: translateY(-2px) rotate(0deg) scale(0.75);
+    opacity: 0.92;
+  }
+}
+
+.bottleBody {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 32px;
+  background: linear-gradient(135deg, #e8f8f5 0%, #a3e4d7 35%, #5ecec4 70%, #2db8a8 100%);
+  border-radius: 4px 4px 12px 12px;
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.5), 0 2px 6px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.bottleNeck {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 18px;
+  background: linear-gradient(90deg, #7dd3c7 0%, #b8e9e2 50%, #7dd3c7 100%);
+  border-radius: 2px;
+  box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.6), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.sendingText {
+  position: relative;
+  z-index: 2;
+  margin: 0;
+  font-family: var(--font-fredoka, system-ui), sans-serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: rgba(40, 60, 65, 0.95);
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
+}
+
+.sendingSubtext {
+  position: relative;
+  z-index: 2;
+  margin: 4px 0 0;
+  font-family: var(--font-nunito, system-ui), sans-serif;
+  font-size: 0.9rem;
+  color: rgba(45, 70, 75, 0.85);
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.4);
 }
 
 .error {

@@ -149,12 +149,15 @@ export default function AudioRecorder() {
     }
   }, []);
 
+  const SENDING_MIN_MS = 6000;
+
   const submitToElevenLabs = useCallback(async () => {
     const url = audioUrlRef.current;
     if (!url) return;
 
     setSubmitting(true);
     setError(null);
+    const start = Date.now();
     try {
       const response = await fetch(url);
       const blob = await response.blob();
@@ -184,12 +187,19 @@ export default function AudioRecorder() {
         throw new Error(data.error ?? "Transcription failed");
       }
 
+      const elapsed = Date.now() - start;
+      const wait = Math.max(0, SENDING_MIN_MS - elapsed);
+      await new Promise((r) => setTimeout(r, wait));
+
       setSubmitResult({
         text: data.text ?? "",
         language_code: data.language_code,
       });
       setState("submitted");
     } catch (err) {
+      const elapsed = Date.now() - start;
+      const wait = Math.max(0, SENDING_MIN_MS - elapsed);
+      await new Promise((r) => setTimeout(r, wait));
       setError(err instanceof Error ? err.message : "Failed to process recording");
     } finally {
       setSubmitting(false);
@@ -295,6 +305,22 @@ export default function AudioRecorder() {
 
   return (
     <div className={styles.wrapper}>
+      {submitting && (
+        <div className={styles.sendingOverlay} aria-live="polite" aria-busy="true">
+          <div className={styles.sendingOcean}>
+            <div className={styles.sendingSun} aria-hidden />
+            <div className={styles.sendingWaves} />
+            <div className={styles.sendingWaves2} />
+            <div className={styles.sendingBottle} aria-hidden>
+              <span className={styles.bottleBody} />
+              <span className={styles.bottleNeck} />
+            </div>
+          </div>
+          <p className={styles.sendingText}>Your note is on its way</p>
+          <p className={styles.sendingSubtext}>Off to find someone who needs it</p>
+        </div>
+      )}
+
       {error && (
         <p className={styles.error} role="alert">
           {error}
