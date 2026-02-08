@@ -36,7 +36,10 @@ export default function Home() {
           <span className={styles.blob1} />
           <span className={styles.blob2} />
           <span className={styles.blob3} />
+          <span className={styles.blob4} />
+          <span className={styles.blob5} />
         </div>
+        <div className={styles.rainbowArc} aria-hidden />
         <main className={styles.main}>
           <div className={styles.intro}>
             <h1 className={styles.heading}>
@@ -45,7 +48,7 @@ export default function Home() {
             </h1>
             <p className={styles.tagline}>
               Record a message of hope, a tip, or something you went
-              through—for anyone who needs to hear it.
+              through for anyone who needs to hear it.
             </p>
           </div>
           <AudioRecorder />
