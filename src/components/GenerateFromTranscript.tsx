@@ -2,16 +2,6 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
 import styles from "@/styles/AudioRecorder.module.css";
 
-const THEME_ORDER = [
-  "Angry",
-  "Anxious",
-  "Happy",
-  "Fear",
-  "Surprise",
-  "Love/Warmth",
-  "Misc",
-];
-
 type VoiceOption = { voice_id: string; name: string; description?: string };
 
 type SegmentForApi =
@@ -144,7 +134,6 @@ export default function GenerateFromTranscript({
   const [languageCode, setLanguageCode] = useState(initialLanguageCode ?? "");
   const [voices, setVoices] = useState<VoiceOption[]>([]);
   const [voiceMainId, setVoiceMainId] = useState("");
-  const [voiceTheme, setVoiceTheme] = useState("");
   const [generatingAudio, setGeneratingAudio] = useState(false);
   const [generatedAudioUrl, setGeneratedAudioUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -157,7 +146,6 @@ export default function GenerateFromTranscript({
         if (Array.isArray(data.voices) && data.voices.length > 0) {
           setVoices(data.voices);
           setVoiceMainId((prev) => prev || data.voices[0].voice_id);
-          setVoiceTheme((prev) => prev || "Misc");
         }
       })
       .catch(() => {});
@@ -177,13 +165,13 @@ export default function GenerateFromTranscript({
         ? {
             segments: segmentsFromInput,
             language_code: languageCode || undefined,
-            voice_theme: voiceTheme || "Misc",
+            voice_theme: "Misc",
           }
         : {
             text: transcript,
             language_code: languageCode || undefined,
             voiceMain: voiceId || undefined,
-            voice_theme: voiceTheme || "Misc",
+            voice_theme: "Misc",
           };
       const res = await fetch("/api/speech", {
         method: "POST",
@@ -219,7 +207,7 @@ export default function GenerateFromTranscript({
     } finally {
       setGeneratingAudio(false);
     }
-  }, [transcript, languageCode, voices, voiceMainId, voiceTheme]);
+  }, [transcript, languageCode, voices, voiceMainId]);
 
   return (
     <div className={styles.wrapper}>
@@ -259,21 +247,6 @@ export default function GenerateFromTranscript({
                 {voices.map((v) => (
                   <option key={v.voice_id} value={v.voice_id}>
                     {v.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className={styles.voiceLabel}>
-              Theme
-              <select
-                className={styles.voiceSelect}
-                value={voiceTheme}
-                onChange={(e) => setVoiceTheme(e.target.value)}
-                aria-label="Theme"
-              >
-                {THEME_ORDER.map((theme) => (
-                  <option key={theme} value={theme}>
-                    {theme}
                   </option>
                 ))}
               </select>
