@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import styles from "@/styles/AudioRecorder.module.css";
 import { setStoredTranscript } from "@/components/GenerateFromTranscript";
+import clientPromise from "@/lib/mongodb.js";
 
 const LEVEL_BARS = 20;
 
@@ -144,66 +145,95 @@ export default function AudioRecorder() {
 
   const SENDING_MIN_MS = 6000;
 
-  const submitToElevenLabs = useCallback(async () => {
-    const url = audioUrlRef.current;
-    if (!url) return;
+    const submitToElevenLabs = useCallback(async () => {
+        const url = audioUrlRef.current;
+        if (!url) return;
 
-    setSubmitting(true);
-    setError(null);
-    const start = Date.now();
-    try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      const reader = new FileReader();
-      const base64 = await new Promise<string>((resolve, reject) => {
-        reader.onloadend = () => {
-          const result = reader.result as string;
-          const base64 = result.split(",")[1];
-          resolve(base64 ?? "");
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
+        setSubmitting(true);
+        setError(null);
+        const start = Date.now();
 
-      const res = await fetch("/api/transcribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          audioBase64: base64,
-          contentType: blob.type || "audio/webm",
-        }),
-      });
+        try {
+            // 1️⃣ Fetch audio blob from the recorded URL
+            const response = await fetch(url);
+            const blob = await response.blob();
 
-      const data = await res.json();
+            // 2️⃣ Convert to base64
+            const reader = new FileReader();
+            const base64 = await new Promise<string>((resolve, reject) => {
+                reader.onloadend = () => {
+                    const result = reader.result as string;
+                    resolve(result.split(",")[1] ?? "");
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
 
-      if (!res.ok) {
-        throw new Error(data.error ?? "Transcription failed");
-      }
+            // 3️⃣ Send to ElevenLabs API
+            const res = await fetch("/api/transcribe", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    audioBase64: base64,
+                    contentType: blob.type || "audio/webm",
+                }),
+            });
 
-      const elapsed = Date.now() - start;
-      const wait = Math.max(0, SENDING_MIN_MS - elapsed);
-      await new Promise((r) => setTimeout(r, wait));
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error ?? "Transcription failed");
 
-      setSubmitResult({
-        text: data.text ?? "",
-        language_code: data.language_code,
-      });
-      setState("submitted");
-    } catch (err) {
-      const elapsed = Date.now() - start;
-      const wait = Math.max(0, SENDING_MIN_MS - elapsed);
-      await new Promise((r) => setTimeout(r, wait));
-      setError(err instanceof Error ? err.message : "Failed to process recording");
-    } finally {
-      setSubmitting(false);
-    }
-  }, []);
+            // 4️⃣ Keep minimum sending time
+            const elapsed = Date.now() - start;
+            const wait = Math.max(0, SENDING_MIN_MS - elapsed);
+            if (wait > 0) await new Promise(r => setTimeout(r, wait));
 
-  const goToGenerate = useCallback(() => {
-    if (!submitResult?.text) return;
-    setStoredTranscript(submitResult.text, submitResult.language_code);
-    window.location.href = "/generate";
-  }, [submitResult]);
+            // 5️⃣ Save transcript to DB
+            const saveRes = await fetch("/api/notes", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    user: "username", // replace with actual user if available
+                    text: data.text ?? "",
+                    emotion: "happy",
+                }),
+            });
+
+            const saveData = await saveRes.json(); // ✅ read JSON only once
+            if (!saveRes.ok) throw new Error(saveData.error ?? "Failed to save note");
+
+            console.log("Saved note with ID:", saveData.insertedId);
+
+            // 6️⃣ Update local state
+            setSubmitResult({
+                text: data.text ?? "",
+                language_code: data.language_code,
+            });
+
+            setState("submitted");
+        } catch (err) {
+            const elapsed = Date.now() - start;
+            const wait = Math.max(0, SENDING_MIN_MS - elapsed);
+            if (wait > 0) await new Promise(r => setTimeout(r, wait));
+
+            setError(err instanceof Error ? err.message : "Failed to process recording");
+            setState("error");
+        } finally {
+            setSubmitting(false);
+        }
+    }, []);
+
+
+
+    const goToGenerate = useCallback(() => {
+        if (!submitResult?.text) return;
+
+        setStoredTranscript(
+            submitResult.text,
+            submitResult.language_code
+        );
+
+        window.location.href = "/generate";
+    }, [submitResult]);
 
   const reset = useCallback(() => {
     if (audioUrlRef.current) {

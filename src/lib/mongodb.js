@@ -1,18 +1,25 @@
-import { MongoClient } from 'mongodb'
+import { MongoClient } from "mongodb";
 
-constant uri = process.env.MONGODB_URI
+const uri = process.env.MONGODB_URI;
 
-let client
-let clientPromise
-
-if (!process.env.MONGODB_URI) {
-  throw new Error('Please add MONGODB_URI to .env.local')
-}
-else {
-  client = new MongoClient(uri)
-  clientPromise = client.connect()
+if (!uri) {
+    throw new Error("Please add MONGODB_URI to .env.local");
 }
 
-export default clientPromise
+let client;
+let clientPromise;
 
+if (process.env.NODE_ENV === "development") {
+    // In dev, reuse the client across hot reloads
+    if (!global._mongoClientPromise) {
+        client = new MongoClient(uri);
+        global._mongoClientPromise = client.connect();
+    }
+    clientPromise = global._mongoClientPromise;
+} else {
+    // In prod, create a new client
+    client = new MongoClient(uri);
+    clientPromise = client.connect();
+}
 
+export default clientPromise;
