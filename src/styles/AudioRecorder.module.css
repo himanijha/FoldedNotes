@@ -57,16 +57,19 @@
   left: -10%;
   right: -10%;
   bottom: 0;
-  height: 120px;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath fill='%23ffffff' fill-opacity='0.2' d='M0 60 Q300 20 600 60 T1200 60 V120 H0 Z'/%3E%3Cpath fill='%23ffffff' fill-opacity='0.1' d='M0 80 Q300 40 600 80 T1200 80 V120 H0 Z'/%3E%3C/svg%3E") repeat-x;
+  height: 140px;
+  z-index: 2;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath fill='%23ffffff' fill-opacity='0.25' d='M0 50 Q150 20 300 50 T600 50 T900 50 T1200 50 V120 H0 Z'/%3E%3Cpath fill='%23ffffff' fill-opacity='0.12' d='M0 70 Q150 45 300 70 T600 70 T900 70 T1200 70 V120 H0 Z'/%3E%3C/svg%3E") repeat-x;
   background-size: 600px 120px;
   animation: waveMove 4s ease-in-out infinite;
 }
 
 .sendingWaves2 {
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath fill='%23ffffff' fill-opacity='0.15' d='M0 70 Q400 30 800 70 T1600 70 V120 H0 Z'/%3E%3C/svg%3E") repeat-x;
+  height: 120px;
+  z-index: 4;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath fill='%23ffffff' fill-opacity='0.18' d='M0 60 Q200 30 400 60 T800 60 T1200 60 V120 H0 Z'/%3E%3C/svg%3E") repeat-x;
   background-size: 600px 120px;
-  animation: waveMove 5s ease-in-out infinite reverse;
+  animation: waveMove 5.5s ease-in-out infinite reverse;
   animation-delay: -1s;
 }
 
@@ -77,47 +80,35 @@
 
 .sendingBottle {
   position: absolute;
-  left: 18%;
-  bottom: 22%;
-  width: 28px;
-  height: 48px;
-  animation: bottleSail 12s ease-in-out forwards;
+  bottom: 60px;
+  left: 20%;
+  width: 48px;
+  height: 72px;
+  z-index: 3;
+  animation: bottleDrift 14s ease-in-out forwards, bottleBob 2.5s ease-in-out infinite;
 }
 
-@keyframes bottleSail {
-  0% { left: 18%; transform: translateY(0) rotate(-2deg); opacity: 1; }
-  15% { left: 28%; transform: translateY(-5px) rotate(2deg); opacity: 1; }
-  30% { left: 38%; transform: translateY(0) rotate(-2deg); opacity: 1; }
-  45% { left: 50%; transform: translateY(-5px) rotate(2deg); opacity: 1; }
-  60% { left: 60%; transform: translateY(0) rotate(-2deg); opacity: 1; }
-  75% { left: 72%; transform: translateY(-4px) rotate(1deg); opacity: 1; }
-  90% { left: 80%; transform: translateY(-2px) rotate(0deg) scale(0.88); opacity: 0.95; }
-  100% { left: 85%; transform: translateY(-2px) rotate(0deg) scale(0.75); opacity: 0.92; }
+.bottleSvg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
 }
 
-.bottleBody {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 22px;
-  height: 32px;
-  background: linear-gradient(135deg, #e8f8f5 0%, #a3e4d7 35%, #5ecec4 70%, #2db8a8 100%);
-  border-radius: 4px 4px 12px 12px;
-  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.5), 0 2px 6px rgba(0, 0, 0, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+@keyframes bottleDrift {
+  0%   { left: 20%; opacity: 1; }
+  20%  { left: 32%; opacity: 1; }
+  40%  { left: 45%; opacity: 1; }
+  60%  { left: 58%; opacity: 1; }
+  80%  { left: 70%; opacity: 0.95; }
+  100% { left: 82%; opacity: 0.85; }
 }
 
-.bottleNeck {
-  position: absolute;
-  bottom: 30px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 8px;
-  height: 18px;
-  background: linear-gradient(90deg, #7dd3c7 0%, #b8e9e2 50%, #7dd3c7 100%);
-  border-radius: 2px;
-  box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.6), 0 1px 3px rgba(0, 0, 0, 0.1);
+@keyframes bottleBob {
+  0%   { transform: translateY(0px) rotate(-4deg); }
+  25%  { transform: translateY(-8px) rotate(2deg); }
+  50%  { transform: translateY(2px) rotate(-3deg); }
+  75%  { transform: translateY(-6px) rotate(3deg); }
+  100% { transform: translateY(0px) rotate(-4deg); }
 }
 
 .sendingText {

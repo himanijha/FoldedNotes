@@ -92,8 +92,20 @@ export default function SettingsPage() {
   const wsRef = useRef<WebSocket | null>(null);
   const intensityRef = useRef(7);
   const rateRef = useRef(5);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const profileDropdownRef = useRef<HTMLDivElement>(null);
   intensityRef.current = intensity;
   rateRef.current = rate;
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(e.target as Node)) {
+        setProfileDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -268,15 +280,48 @@ export default function SettingsPage() {
             <span>Notes</span>
           </Link>
           <div className={homeStyles.headerProfile}>
-            {profileInitial === "Y" ? (
-              <span className={homeStyles.anonymousBadge} aria-hidden>Anonymous</span>
-            ) : (
-              <span className={homeStyles.headerAvatar} aria-hidden title="Profile">{profileInitial}</span>
-            )}
             <Link href="/home" className={homeStyles.headerProfileLink} aria-label="Home">
               Home
             </Link>
-            <span className={homeStyles.headerCurrent} aria-current="page">Settings</span>
+            <div className={homeStyles.profileDropdownWrap} ref={profileDropdownRef}>
+              <button
+                type="button"
+                className={`${homeStyles.headerAvatar} ${!isSignedIn ? homeStyles.headerAvatarAnon : ""}`}
+                onClick={() => setProfileDropdownOpen((o) => !o)}
+                aria-expanded={profileDropdownOpen}
+                aria-haspopup="menu"
+                aria-label="Profile menu"
+                title={isSignedIn ? (username || "Profile") : "Anonymous"}
+              >
+                {isSignedIn ? profileInitial : "A"}
+              </button>
+              {profileDropdownOpen && (
+                <div className={homeStyles.profileDropdownPanel} role="menu">
+                  {isSignedIn ? (
+                    <button
+                      type="button"
+                      className={homeStyles.profileDropdownItem}
+                      role="menuitem"
+                      onClick={() => {
+                        setProfileDropdownOpen(false);
+                        handleLogout();
+                      }}
+                    >
+                      Log out
+                    </button>
+                  ) : (
+                    <Link
+                      href="/login"
+                      className={homeStyles.profileDropdownItem}
+                      role="menuitem"
+                      onClick={() => setProfileDropdownOpen(false)}
+                    >
+                      Sign in
+                    </Link>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </header>
         <main className={settingsStyles.settingsPage}>
@@ -285,8 +330,8 @@ export default function SettingsPage() {
               <div className={settingsStyles.profileCard} aria-label="Profile">
             <h2 className={settingsStyles.settingsTitle}>Profile</h2>
             <div className={settingsStyles.profileRow}>
-              <span className={settingsStyles.profileAvatar} aria-hidden title={username || "Profile"}>
-                {profileInitial}
+              <span className={settingsStyles.profileAvatar} aria-hidden title={isSignedIn ? (username || "Profile") : "Anonymous"}>
+                {isSignedIn ? profileInitial : "A"}
               </span>
               <div className={settingsStyles.profileInfo}>
                 {isSignedIn && username ? (
@@ -295,14 +340,14 @@ export default function SettingsPage() {
                 {isSignedIn && pronouns ? (
                   <p className={settingsStyles.profilePronouns}>{pronouns}</p>
                 ) : null}
-                <p className={settingsStyles.profileStatus}>
-                  {isSignedIn ? "Signed in" : "Anonymous"}
-                </p>
-                <p className={settingsStyles.profileHint}>
-                  {isSignedIn
-                    ? "You're using FoldedNotes with your account."
-                    : "No account — use the app as a guest. Sign in to save across devices."}
-                </p>
+                {!isSignedIn && (
+                  <>
+                    <p className={settingsStyles.profileStatus}>Anonymous</p>
+                    <p className={settingsStyles.profileHint}>
+                      No account. Use the app as a guest. Sign in to save across devices.
+                    </p>
+                  </>
+                )}
                 {!isSignedIn ? (
                   <Link href="/login" className={settingsStyles.profileLink}>
                     Sign in or create account
@@ -454,7 +499,7 @@ export default function SettingsPage() {
                 <span className={settingsStyles.reflectionWordText}>{dominantEmotion}</span>
               </div>
             ) : (
-              <p className={settingsStyles.reflectionEmpty}>Log notes on Home — your reflection will appear here.</p>
+              <p className={settingsStyles.reflectionEmpty}>Log notes on Home. Your reflection will appear here.</p>
             )}
             {weekNotesTotal > 0 && (
               <p className={settingsStyles.reflectionMuted} aria-hidden>from your notes</p>
