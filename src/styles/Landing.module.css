@@ -1,0 +1,278 @@
+/* ---------- PAGE ---------- */
+
+.page {
+    --accent: #2d8a7a;
+    --accent-soft: rgba(45, 138, 122, 0.15);
+    --accent-border: rgba(45, 138, 122, 0.35);
+    /* Pride palette */
+    --pride-r: #e86a6a;
+    --pride-o: #f0a050;
+    --pride-y: #f0d050;
+    --pride-g: #50c078;
+    --pride-b: #5090c8;
+    --pride-p: #a060c0;
+    --ink: #1a1a1a;
+    --ink-soft: #5a5a5a;
+    --paper: #ffffff;
+    --paper-shadow: rgba(45, 138, 122, 0.12);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    box-sizing: border-box;
+    font-family: var(--font-nunito), system-ui, sans-serif;
+    background: linear-gradient( 165deg, #fff0f2 0%, #fff5ed 18%, #fffef5 35%, #f2fff5 52%, #f0f8ff 70%, #f5f0ff 88%, #fff0f2 100% );
+    position: relative;
+    overflow-x: hidden; /* horizontal overflow only */
+}
+
+/* ---------- BACKGROUND BLOBS ---------- */
+
+.bgBlobs {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.blob1,
+.blob2,
+.blob3,
+.blob4,
+.blob5 {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.32;
+}
+
+.blob1 {
+    width: 280px;
+    height: 280px;
+    background: #b8e4de;
+    top: -60px;
+    right: -60px;
+}
+
+.blob2 {
+    width: 240px;
+    height: 240px;
+    background: #e8dcc8;
+    bottom: -50px;
+    left: -50px;
+}
+
+.blob3 {
+    width: 180px;
+    height: 180px;
+    background: #d4e8e4;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.blob4 {
+    width: 200px;
+    height: 200px;
+    background: #f0d4e4;
+    top: 15%;
+    left: -30px;
+}
+
+.blob5 {
+    width: 160px;
+    height: 160px;
+    background: #e0d8f0;
+    bottom: 20%;
+    right: -20px;
+}
+
+/* ---------- RAINBOW ARC ---------- */
+
+.rainbowArc {
+    position: absolute;
+    top: -8%;
+    left: 50%;
+    width: 140%;
+    height: 180px;
+    transform: translate(-50%, 0);
+    background: linear-gradient( 180deg, transparent 0%, var(--pride-r) 12%, var(--pride-o) 28%, var(--pride-y) 44%, var(--pride-g) 58%, var(--pride-b) 72%, var(--pride-p) 88%, transparent 100% );
+    opacity: 0.18;
+    filter: blur(28px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ---------- MAIN NOTE CARD ---------- */
+
+.main {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 420px;
+    padding: 28px 24px 32px;
+    margin: 0 auto;
+    background: var(--paper);
+    border-radius: 20px;
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.06), 0 12px 32px var(--paper-shadow), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+    transform: rotate(-0.8deg);
+    animation: noteIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    overflow: visible; /* allow buttons to show */
+}
+
+@keyframes noteIn {
+    from {
+        opacity: 0;
+        transform: rotate(-2deg) scale(0.96) translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: rotate(-0.8deg) scale(1) translateY(0);
+    }
+}
+
+/* ---------- INTRO ---------- */
+
+.intro {
+    margin-bottom: 16px;
+}
+
+/* ---------- HEADING ---------- */
+
+.heading {
+    font-family: var(--font-fredoka), system-ui, sans-serif;
+    font-size: 2rem;
+    font-weight: 600;
+    line-height: 1.15;
+    margin: 0 0 8px 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0 6px;
+}
+
+.headingWord {
+    display: inline-block;
+    background: linear-gradient( 120deg, var(--pride-r) 0%, var(--pride-o) 20%, var(--accent) 45%, var(--pride-b) 70%, var(--pride-p) 100% );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 10s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+/* ---------- TAGLINE ---------- */
+
+.tagline {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: var(--ink-soft);
+    margin: 0 auto 12px auto;
+    max-width: 320px;
+}
+
+/* ---------- RECORDINGS ---------- */
+
+.recordings {
+    margin-top: 12px;
+    text-align: left;
+    max-height: 30vh; /* internal scroll if too many recordings */
+    overflow-y: auto;
+    padding-right: 4px; /* scrollbar space */
+}
+
+    .recordings h2 {
+        font-family: var(--font-fredoka), system-ui, sans-serif;
+        font-size: 1.15rem;
+        margin-bottom: 8px;
+        color: var(--ink);
+    }
+
+.recordingCard {
+    background: var(--paper);
+    border: 1px solid var(--accent-border);
+    border-radius: 14px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    box-shadow: 0 6px 14px var(--paper-shadow);
+}
+
+.recordingDate {
+    font-size: 0.7rem;
+    color: var(--ink-soft);
+    margin-bottom: 4px;
+}
+
+.recordingCard audio {
+    width: 100%;
+}
+
+/* ---------- EMPTY STATE BUTTON ---------- */
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.againButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent);
+    color: white;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+    .againButton:hover {
+        background: #247060;
+    }
+
+/* ---------- MOBILE ---------- */
+
+@media (max-width: 600px) {
+    .main {
+        padding: 20px 16px 24px;
+        transform: rotate(-0.5deg);
+    }
+
+    .heading {
+        font-size: 1.6rem;
+    }
+
+    .tagline {
+        font-size: 0.85rem;
+    }
+
+    .blob1, .blob2, .blob3, .blob4, .blob5 {
+        width: 120px;
+        height: 120px;
+    }
+
+    .rainbowArc {
+        height: 120px;
+        top: -5%;
+    }
+}

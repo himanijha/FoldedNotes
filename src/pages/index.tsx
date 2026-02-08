@@ -1,7 +1,9 @@
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import { Fredoka, Nunito } from "next/font/google";
-import styles from "../styles/Home.module.css";
+import styles from "../styles/Landing.module.css";
+import { useEffect, useState } from "react";
+
 
 const fredoka = Fredoka({
   variable: "--font-fredoka",
