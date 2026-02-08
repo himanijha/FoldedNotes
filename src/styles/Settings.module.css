@@ -18,6 +18,58 @@
   margin: 0 0 24px 0;
 }
 
+/* Heart: static; white pulse line (heart monitor) at pulse rate only */
+.heartWrap {
+  --heart-period-ms: 600ms;
+  margin-bottom: 24px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 112px;
+  height: 112px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.heartIcon {
+  width: 112px;
+  height: 112px;
+  color: #c53030;
+  opacity: 1;
+}
+
+.heartPulse {
+  animation: heartBeat var(--heart-period-ms) ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes heartBeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  15% {
+    transform: scale(1.08);
+  }
+  30%, 100% {
+    transform: scale(1);
+  }
+}
+
+.pulseOnHeart {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 96px;
+  height: 32px;
+  pointer-events: none;
+}
+
+.pulsePath {
+  /* Static line; no draw animation */
+}
+
 .settingsRow {
   margin-bottom: 20px;
 }

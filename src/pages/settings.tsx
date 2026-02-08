@@ -39,6 +39,11 @@ export default function SettingsPage() {
     }
   };
 
+  // Rate: 1–10 → 1200–200 ms (pulse timing). Intensity: 1–10 → spike/dip (1 = small peak, 10 = tall peak; never flat)
+  const heartPeriodMs = 1200 - (rate - 1) * (1000 / 9);
+  const spikePeakY = 11 - (intensity - 1) * (9 / 9); // up peak (R)
+  const dipY = 24 - spikePeakY; // down peak (S)
+
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -103,6 +108,38 @@ export default function SettingsPage() {
           </Link>
           <div className={settingsStyles.settingsCard}>
             <h2 className={settingsStyles.settingsTitle}>Haptic Settings</h2>
+
+            <div
+              className={settingsStyles.heartWrap}
+              style={{ "--heart-period-ms": `${heartPeriodMs}ms` } as React.CSSProperties}
+              aria-hidden
+            >
+              <svg
+                className={`${settingsStyles.heartIcon} ${settingsStyles.heartPulse}`}
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                role="img"
+                aria-label="Heartbeat"
+              >
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+              </svg>
+              <svg
+                className={settingsStyles.pulseOnHeart}
+                viewBox="0 0 100 24"
+                preserveAspectRatio="none"
+                aria-hidden
+              >
+                <path
+                  className={settingsStyles.pulsePath}
+                  d={`M0 12 L22 12 L28 ${spikePeakY} L34 12 L46 12 L52 ${dipY} L58 12 L100 12`}
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="3.5"
+                  strokeLinecap="butt"
+                  strokeLinejoin="miter"
+                />
+              </svg>
+            </div>
 
             <div className={settingsStyles.settingsRow}>
               <label className={settingsStyles.settingsLabel} htmlFor="intensitySlider">
