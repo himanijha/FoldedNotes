@@ -33,3 +33,22 @@ OUTPUT FORMAT:
 MESSAGE:
 """${text}"""
 `;
+
+export const summaryPrompt = (messages: string[]) => `
+You are an emotional summary system.
+
+TASK:
+Summarize the emotional content of the following messages in 1-2 sentences.
+
+RULES:
+Focus on the most important emotions and how they relate to each other.
+Help the user feel understood without rereading everything.
+
+OUTPUT FORMAT:
+{
+  "summary": "<your emotional summary here>"
+}
+
+MESSAGE:
+"""${messages.join("\n\n")}"""
+`;
