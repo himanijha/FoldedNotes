@@ -1,7 +1,10 @@
+"use client";
+
 import Head from "next/head";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation"; // <--- import router
 import { Fredoka, Nunito } from "next/font/google";
 import styles from "@/styles/Home.module.css";
 
@@ -44,6 +47,15 @@ const CATEGORIES = ["Hope", "Tips", "Stories", "Support", "Gratitude"];
 
 export default function HomePage() {
   const [recordPopupOpen, setRecordPopupOpen] = useState(false);
+  const router = useRouter();
+
+  // <--- redirect if no anon_id
+  useEffect(() => {
+    const anonId = localStorage.getItem("anon_id");
+    if (!anonId) {
+      router.push("/login");
+    }
+  }, [router]);
 
   return (
     <>
