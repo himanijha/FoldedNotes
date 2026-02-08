@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import clientPromise from "@/lib/mongodb.js";
+import clientPromise from "@/lib/mongodb";
 import { hashPassword, createToken } from "@/lib/auth";
 import { ObjectId } from "mongodb";
 
