@@ -1,6 +1,30 @@
 :root {
-  --background: #faf8f5;
+  /* App-wide design tokens for cohesive UI */
+  --background: #f6f6f2;
   --foreground: #1a1a1a;
+  --accent: #2d8a7a;
+  --accent-soft: rgba(45, 138, 122, 0.15);
+  --accent-border: rgba(45, 138, 122, 0.35);
+  --ink: #1a1a1a;
+  --ink-soft: #5a5a5a;
+  --paper: #ffffff;
+  --paper-notes: #f8f7f4;
+  --card-bg: #f8f7f4;
+  --paper-shadow: rgba(45, 138, 122, 0.12);
+  --card-radius: 12px;
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --card-shadow-border: 0 0 0 1px rgba(0, 0, 0, 0.04);
+  --btn-radius: 12px;
+  --input-radius: 10px;
+  --section-title-size: 1.1rem;
+  --space-section: 24px;
+  --space-card: 20px;
+  --pride-r: #e86a6a;
+  --pride-o: #f0a050;
+  --pride-y: #f0d050;
+  --pride-g: #50c078;
+  --pride-b: #5090c8;
+  --pride-p: #a060c0;
 }
 
 html,

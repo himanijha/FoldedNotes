@@ -1,21 +1,6 @@
 /* ---------- PAGE ---------- */
 
 .page {
-    --accent: #2d8a7a;
-    --accent-soft: rgba(45, 138, 122, 0.15);
-    --accent-border: rgba(45, 138, 122, 0.35);
-    /* Pride palette */
-    --pride-r: #e86a6a;
-    --pride-o: #f0a050;
-    --pride-y: #f0d050;
-    --pride-g: #50c078;
-    --pride-b: #5090c8;
-    --pride-p: #a060c0;
-    --ink: #1a1a1a;
-    --ink-soft: #5a5a5a;
-    --paper: #ffffff;
-    --paper-notes: #faf8f3;
-    --paper-shadow: rgba(45, 138, 122, 0.12);
     --notes-rings-bar: #a89888;
     --notes-rings-hole: #6a5c52;
     min-height: 100vh;
@@ -24,7 +9,7 @@
     max-width: 100vw;
     padding: 8px 12px;
     box-sizing: border-box;
-    background: #f6f6f2;
+    background: var(--background);
     position: relative;
     overflow: hidden;
     font-family: var(--font-nunito), system-ui, sans-serif;
@@ -112,7 +97,7 @@
     color: var(--accent);
     text-decoration: none;
     padding: 6px 12px;
-    border-radius: 10px;
+    border-radius: var(--input-radius);
     transition: background 0.2s ease, color 0.2s ease;
 }
 
@@ -126,7 +111,7 @@
     font-weight: 600;
     color: var(--ink);
     padding: 6px 12px;
-    border-radius: 10px;
+    border-radius: var(--input-radius);
     cursor: default;
     pointer-events: none;
 }
@@ -200,14 +185,11 @@
     position: relative;
     width: 100%;
     max-width: 260px;
-    padding: 20px 18px 22px;
-    background: linear-gradient(180deg, #faf6e8 0%, #f5f0dc 100%);
-    border: 1px solid rgba(180, 160, 120, 0.35);
-    border-radius: 2px;
-    box-shadow:
-        0 2px 8px rgba(0, 0, 0, 0.06),
-        0 6px 20px rgba(0, 0, 0, 0.04),
-        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    padding: var(--space-card) 18px 22px;
+    background: linear-gradient(180deg, #faf6f0 0%, #f5f0e0 100%);
+    border: 1px solid rgba(180, 165, 130, 0.2);
+    border-radius: var(--card-radius);
+    box-shadow: var(--card-shadow), var(--card-shadow-border), inset 0 1px 0 rgba(255, 255, 255, 0.5);
     transform: rotate(-0.8deg);
     box-sizing: border-box;
 }
@@ -219,8 +201,8 @@
     transform: translateX(-50%) rotate(-0.8deg);
     width: 70%;
     height: 22px;
-    background: rgba(255, 252, 230, 0.75);
-    border: 1px solid rgba(200, 190, 150, 0.4);
+    background: rgba(252, 248, 238, 0.95);
+    border: 1px solid rgba(200, 190, 160, 0.3);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
     border-radius: 1px;
     pointer-events: none;
@@ -232,9 +214,9 @@
 .homeColRecord,
 .homeColFeed {
     background: var(--paper-notes);
-    border-radius: 20px;
-    padding: 24px;
-    box-shadow: 0 4px 0 rgba(0,0,0,0.06), 0 12px 28px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
+    border-radius: var(--card-radius);
+    padding: var(--space-section);
+    box-shadow: var(--card-shadow), var(--card-shadow-border);
     min-height: 75vh;
     max-height: 75vh;
     overflow-y: auto;
@@ -309,6 +291,192 @@
     margin-bottom: 4px;
 }
 
+.homeCalendarColumn {
+    flex-shrink: 0;
+    width: 320px;
+    max-width: 100%;
+    padding: 8px 0 72px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-section);
+    min-width: 0;
+}
+
+.emotionForDaySection {
+    width: 100%;
+    background: var(--card-bg);
+    border-radius: var(--card-radius);
+    padding: var(--space-card);
+    box-shadow: var(--card-shadow), var(--card-shadow-border);
+}
+
+.emotionForDayTitle {
+    font-family: var(--font-fredoka), system-ui, sans-serif;
+    font-size: var(--section-title-size);
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0 0 12px 0;
+}
+
+.emotionForDayPill {
+    display: inline-block;
+    font-family: var(--font-fredoka), system-ui, sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 8px 18px;
+    border-radius: 999px;
+    color: rgba(255, 255, 255, 0.95);
+    letter-spacing: 0.02em;
+}
+
+.emotionForDayPill[data-emotion="Happy"] { background: #c9a028; }
+.emotionForDayPill[data-emotion="Sad"] { background: #4a7a98; }
+.emotionForDayPill[data-emotion="Angry"] { background: #b85a52; }
+.emotionForDayPill[data-emotion="Anxious"] { background: #c48848; }
+.emotionForDayPill[data-emotion="Fear"] { background: #7a6a9a; }
+.emotionForDayPill[data-emotion="Surprise"] { background: #5a9a7a; }
+.emotionForDayPill[data-emotion="Love/Warmth"] { background: #b86a82; }
+.emotionForDayPill[data-emotion="Misc"] { background: #8a8a92; }
+
+.emotionForDayEmpty {
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.myNotesSection {
+    width: 100%;
+    background: var(--card-bg);
+    border-radius: var(--card-radius);
+    padding: var(--space-card) var(--space-card) var(--space-section);
+    box-shadow: var(--card-shadow), var(--card-shadow-border);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-height: 320px;
+}
+
+.myNotesTitle {
+    font-family: var(--font-fredoka), system-ui, sans-serif;
+    font-size: var(--section-title-size);
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0 0 12px 0;
+    flex-shrink: 0;
+}
+
+.myNotesEmpty {
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.myNotesList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    min-height: 0;
+    flex: 1 1 0;
+    -webkit-overflow-scrolling: touch;
+    padding-right: 4px;
+}
+
+.myNotesList::-webkit-scrollbar {
+    width: 6px;
+}
+
+.myNotesList::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 3px;
+}
+
+.myNotesItem {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    border-radius: var(--input-radius);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    background: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+    font-family: var(--font-nunito), system-ui, sans-serif;
+}
+
+.myNotesItem:hover {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: var(--accent-border);
+}
+
+.myNotesItemPreview {
+    display: block;
+    font-size: 0.88rem;
+    color: var(--ink);
+    line-height: 1.35;
+    margin-bottom: 4px;
+}
+
+.myNotesItemDate {
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+}
+
+.circleFilterSection {
+    width: 100%;
+    background: var(--card-bg);
+    border-radius: var(--card-radius);
+    padding: var(--space-card);
+    box-shadow: var(--card-shadow), var(--card-shadow-border);
+}
+
+.circleFilterLabel {
+    display: block;
+    font-family: var(--font-fredoka), system-ui, sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 10px;
+}
+
+.circleFilterRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.circleFilterBtn,
+.circleFilterActive {
+    padding: 8px 14px;
+    border-radius: var(--input-radius);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.6);
+    font-family: var(--font-nunito), system-ui, sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.circleFilterBtn:hover {
+    color: var(--ink);
+    background: rgba(255, 255, 255, 0.9);
+    border-color: var(--accent-border);
+}
+
+.circleFilterActive {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-color: var(--accent-border);
+}
+
 .anonymousTagline {
     font-size: 0.85rem;
     color: var(--ink-soft);
@@ -321,7 +489,7 @@
     display: block;
     font-size: 0.9rem;
     font-weight: 600;
-    color: #5a5240;
+    color: var(--ink);
     margin-bottom: 10px;
     letter-spacing: 0.02em;
 }
@@ -333,18 +501,18 @@
     font-family: var(--font-nunito), system-ui, sans-serif;
     font-size: 0.95rem;
     line-height: 1.5;
-    color: #3a3528;
-    background: rgba(255, 255, 255, 0.5);
-    border: 1px solid rgba(160, 150, 120, 0.35);
-    border-radius: 0;
+    color: var(--ink);
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: var(--input-radius);
     resize: vertical;
     box-sizing: border-box;
     transition: border-color 0.2s ease, background 0.2s ease;
 }
 
 .noteSidebarPaper .writeNoteInput::placeholder {
-    color: #8a8268;
-    opacity: 0.9;
+    color: var(--ink-soft);
+    opacity: 0.8;
 }
 
 .noteSidebarPaper .writeNoteInput:focus {
@@ -372,10 +540,10 @@
     font-weight: 600;
     color: #fff;
     background: var(--accent);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 4px;
+    border: none;
+    border-radius: var(--btn-radius);
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--card-shadow);
     transition: background 0.2s ease, transform 0.15s ease;
 }
 
@@ -388,8 +556,8 @@
 }
 
 .noteSidebarPaper .writeNotePost:disabled {
-    opacity: 0.6;
     cursor: not-allowed;
+    /* Keep same dark green at all times – no opacity/color change */
 }
 
 .headerProfile .anonymousBadge {
@@ -397,7 +565,7 @@
     font-weight: 600;
     color: var(--ink-soft);
     padding: 6px 10px;
-    border-radius: 10px;
+    border-radius: var(--input-radius);
     background: rgba(0, 0, 0, 0.05);
     border: 1px solid rgba(0, 0, 0, 0.08);
 }
@@ -533,15 +701,26 @@
 
 .feedAndRecord .feedList > li .feedCard {
     transform: none;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, outline 0.2s ease;
 }
 
 .feedAndRecord .feedList > li .feedCard:hover {
-    transform: scale(1.08);
+    transform: scale(1.12);
     z-index: 999;
+    box-shadow: 0 6px 0 rgba(0, 0, 0, 0.08), 0 18px 36px rgba(0, 0, 0, 0.18);
+    border-color: rgba(255, 255, 255, 0.9);
 }
 
 .feedAndRecord .feedList > li .feedCard:active {
-    transform: scale(0.97);
+    transform: scale(1.02);
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1), 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.feedAndRecord .feedList > li .feedCard:focus-visible {
+    outline: 3px solid rgba(255, 255, 255, 0.9);
+    outline-offset: 3px;
+    z-index: 999;
 }
 
 /* Force same shadow as mic on all note circles in the ring */
@@ -594,18 +773,25 @@
     box-shadow: var(--circle-shadow, 0 6px 16px rgba(0, 0, 0, 0.12));
     text-align: center;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, outline 0.2s ease;
     overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .feedCard:hover {
-    transform: scale(1.08);
-    box-shadow: 0 5px 0 rgba(0, 0, 0, 0.06), 0 14px 28px rgba(0, 0, 0, 0.14);
+    transform: scale(1.12);
+    box-shadow: 0 6px 0 rgba(0, 0, 0, 0.08), 0 18px 36px rgba(0, 0, 0, 0.18);
+    border-color: rgba(255, 255, 255, 0.9);
 }
 
 .feedCard:active {
-    transform: scale(0.97);
-    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.08), 0 8px 16px rgba(0, 0, 0, 0.1);
+    transform: scale(1.02);
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1), 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.feedCard:focus-visible {
+    outline: 3px solid rgba(255, 255, 255, 0.9);
+    outline-offset: 3px;
 }
 
 .feedCard[data-size="medium"] {
@@ -848,7 +1034,8 @@
 
 .homeColTitle {
     font-family: var(--font-fredoka), system-ui, sans-serif;
-    font-size: 1.1rem;
+    font-size: var(--section-title-size);
+    font-weight: 600;
     margin-bottom: 16px;
     color: var(--ink);
 }
@@ -1467,6 +1654,13 @@
         max-height: none;
     }
 
+    .homeCalendarColumn {
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 8px 12px 24px;
+    }
+
     .headerLogo {
         font-size: 2rem;
     }
@@ -1552,5 +1746,13 @@
         width: 72px;
         height: 72px;
         padding: 10px;
+    }
+
+    .feedAndRecord .feedList > li .feedCard:hover {
+        transform: scale(1.15);
+    }
+
+    .feedAndRecord .feedList > li .feedCard:active {
+        transform: scale(1.03);
     }
 }

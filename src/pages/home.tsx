@@ -8,8 +8,28 @@ import { useRouter } from "next/router";
 import { Fredoka, Nunito } from "next/font/google";
 import { mergeAudioBlobs, segmentsToBlobs } from "@/lib/audio";
 import homeStyles from "@/styles/Home.module.css";
+import settingsStyles from "@/styles/Settings.module.css";
 
-type NoteRecord = { _id: string; text?: string; date?: string; emotion?: string };
+type NoteRecord = { _id: string; text?: string; date?: string; dateDay?: string; emotion?: string };
+
+const WEEKDAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+
+function getDateKey(year: number, month: number, day: number) {
+  return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+function buildCalendarDays(year: number, month: number) {
+  const first = new Date(year, month, 1);
+  const last = new Date(year, month + 1, 0);
+  const startPad = first.getDay();
+  const daysInMonth = last.getDate();
+  const days: { day: number; dateKey: string }[] = [];
+  for (let i = 0; i < startPad; i++) days.push({ day: 0, dateKey: "" });
+  for (let d = 1; d <= daysInMonth; d++) {
+    days.push({ day: d, dateKey: getDateKey(year, month, d) });
+  }
+  return days;
+}
 type VoiceOption = { voice_id: string; name: string; description?: string };
 
 const fredoka = Fredoka({
@@ -70,6 +90,12 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
     const [writeNoteText, setWriteNoteText] = useState("");
     const [writeNotePosting, setWriteNotePosting] = useState(false);
     const [writeNoteError, setWriteNoteError] = useState<string | null>(null);
+    const [calendarMonth, setCalendarMonth] = useState(() => {
+        const d = new Date();
+        return { year: d.getFullYear(), month: d.getMonth() };
+    });
+    const [myNotes, setMyNotes] = useState<NoteRecord[]>([]);
+    const [circleFilter, setCircleFilter] = useState<"all" | "week" | "month">("all");
 
     useEffect(() => {
         const anonId = typeof window !== "undefined" ? localStorage.getItem("anon_id") : null;
@@ -80,6 +106,28 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
 
     useEffect(() => {
         setAvatarLetter(typeof window !== "undefined" && localStorage.getItem("auth_token") ? "U" : "Y");
+    }, []);
+
+    const fetchMyNotes = () => {
+        if (typeof window === "undefined") return;
+        const anonId = localStorage.getItem("anon_id");
+        if (!anonId) return;
+        fetch(`/api/notes?user=${encodeURIComponent(anonId)}`)
+            .then((r) => r.json())
+            .then((data) => {
+                const list = Array.isArray(data.notes) ? data.notes : [];
+                setMyNotes(list.map((n: { id?: string; _id?: string; text?: string; date?: string; emotion?: string }) => ({
+                    _id: n.id || n._id || "",
+                    text: n.text,
+                    date: n.date,
+                    emotion: n.emotion,
+                })));
+            })
+            .catch(() => setMyNotes([]));
+    };
+
+    useEffect(() => {
+        fetchMyNotes();
     }, []);
 
     useEffect(() => {
@@ -178,7 +226,47 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
         generateAndPlayNote();
     }, [selectedNote?._id, popupVoiceId || defaultVoiceId]);
 
-    const displayRecordings = Array.isArray(recordings) ? recordings : [];
+    const allNotesForCircle: NoteRecord[] = Array.isArray(recordings)
+        ? recordings.map((r: any) => ({
+              _id: r._id ?? r.id ?? "",
+              text: r.text,
+              date: r.date,
+              dateDay: r.dateDay,
+              emotion: r.emotion,
+          }))
+        : [];
+    const now = new Date();
+    const weekAgo = new Date(now);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const monthAgo = new Date(now);
+    monthAgo.setDate(monthAgo.getDate() - 30);
+
+    const circleNotes: NoteRecord[] = allNotesForCircle.filter((n) => {
+        if (!n.date) return true;
+        const d = new Date(n.date);
+        if (circleFilter === "week") return d >= weekAgo;
+        if (circleFilter === "month") return d >= monthAgo;
+        return true;
+    });
+
+    const notesByDate: Record<string, string> = {};
+    myNotes.forEach((n: NoteRecord) => {
+        const key = n.dateDay ?? n.date?.slice(0, 10);
+        if (key && n.emotion && !notesByDate[key]) notesByDate[key] = n.emotion;
+    });
+    const todayKey = new Date().toISOString().slice(0, 10);
+    const todayEmotion = notesByDate[todayKey] ?? null;
+    const calendarDays = buildCalendarDays(calendarMonth.year, calendarMonth.month);
+    const monthLabel = new Date(calendarMonth.year, calendarMonth.month).toLocaleString("en-US", {
+        month: "long",
+        year: "numeric",
+    });
+    const prevMonth = () => {
+        setCalendarMonth((m) => (m.month === 0 ? { year: m.year - 1, month: 11 } : { year: m.year, month: m.month - 1 }));
+    };
+    const nextMonth = () => {
+        setCalendarMonth((m) => (m.month === 11 ? { year: m.year + 1, month: 0 } : { year: m.year, month: m.month + 1 }));
+    };
 
     return (
         <>
@@ -218,7 +306,7 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
                 <main className={homeStyles.mainFull}>
                     <aside className={homeStyles.noteSidebar} aria-label="Notes">
                         <h2 className={homeStyles.homeColTitle}>Notes</h2>
-                        <p className={homeStyles.anonymousTagline}>Your private notes — no account, no trace.</p>
+                        {/* <p className={homeStyles.anonymousTagline}>Your private notes — no account, no trace.</p> */}
                         <div className={homeStyles.noteSidebarPaper} aria-label="Write a note">
                             <div className={homeStyles.noteSidebarTape} aria-hidden />
                             <label htmlFor="write-note-input" className={homeStyles.writeNoteLabel}>
@@ -262,14 +350,16 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
                                         } catch {
                                             /* use Misc if Gemini classification fails */
                                         }
+                                        const anonId = typeof window !== "undefined" ? localStorage.getItem("anon_id") : null;
                                         const res = await fetch("/api/notes", {
                                             method: "POST",
                                             headers: { "Content-Type": "application/json" },
-                                            body: JSON.stringify({ user: "username", text, emotion }),
+                                            body: JSON.stringify({ user: anonId || "anonymous", text, emotion }),
                                         });
                                         const data = await res.json().catch(() => ({}));
                                         if (!res.ok) throw new Error(data.error || "Failed to post");
                                         setWriteNoteText("");
+                                        fetchMyNotes();
                                         router.replace(router.asPath);
                                     } catch (err) {
                                         setWriteNoteError(err instanceof Error ? err.message : "Failed to post note");
@@ -282,6 +372,54 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
                                 {writeNotePosting ? "Posting…" : "Pin to feed"}
                             </button>
                         </div>
+                        {/* <section className={homeStyles.emotionForDaySection} aria-label="Your emotion for the day">
+                            <h2 className={homeStyles.emotionForDayTitle}>Your emotion for the day</h2>
+                            {todayEmotion ? (
+                                <span
+                                    className={homeStyles.emotionForDayPill}
+                                    data-emotion={todayEmotion}
+                                    aria-label={`Today's mood: ${todayEmotion}`}
+                                >
+                                    {todayEmotion}
+                                </span>
+                            ) : (
+                                <p className={homeStyles.emotionForDayEmpty}>
+                                    Add a recording to add your mood for the day.
+                                </p>
+                            )}
+                        </section> */}
+                        <section className={homeStyles.myNotesSection} aria-label="Your notes">
+                            <h2 className={homeStyles.myNotesTitle}>Your notes</h2>
+                            {myNotes.length === 0 ? (
+                                <p className={homeStyles.myNotesEmpty}>No notes yet. Write or record one to see it here.</p>
+                            ) : (
+                                <ul className={homeStyles.myNotesList}>
+                                    {myNotes.map((note) => (
+                                        <li key={note._id}>
+                                            <button
+                                                type="button"
+                                                className={homeStyles.myNotesItem}
+                                                onClick={(e) => openNotePopup(note, e)}
+                                                data-emotion={note.emotion || "Misc"}
+                                            >
+                                                <span className={homeStyles.myNotesItemPreview}>
+                                                    {note.text ? (note.text.length > 60 ? `${note.text.slice(0, 60)}…` : note.text) : "No content"}
+                                                </span>
+                                                {note.date && (
+                                                    <span className={homeStyles.myNotesItemDate}>
+                                                        {new Date(note.date).toLocaleDateString("en-US", {
+                                                            month: "short",
+                                                            day: "numeric",
+                                                            year: "numeric",
+                                                        })}
+                                                    </span>
+                                                )}
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </section>
                     </aside>
 
                     <aside className={homeStyles.homeColNotesWithFilters}>
@@ -307,12 +445,34 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
                                     <line x1="12" y1="19" x2="12" y2="22" />
                                 </svg>
                             </button>
-                            {displayRecordings.length > 0 ? (
+                            {circleNotes.length > 0 ? (
                                 <ul className={homeStyles.feedList}>
-                                    {displayRecordings.map((rec: NoteRecord, i: number) => {
-                                        const n = displayRecordings.length;
-                                        const angle = n > 0 ? ((i + 0.5) / n) * 2 * Math.PI : 0;
-                                        const radius = 180;
+                                    {circleNotes.map((rec: NoteRecord, i: number) => {
+                                        const NOTES_PER_RING = 12;
+                                        const SINGLE_RING_RADIUS = 180;
+                                        const RING_RADII = [130, 190, 250];
+                                        const n = circleNotes.length;
+                                        let radius: number;
+                                        let angle: number;
+                                        if (n <= NOTES_PER_RING) {
+                                            angle = n > 0 ? ((i + 0.5) / n) * 2 * Math.PI : 0;
+                                            radius = SINGLE_RING_RADIUS;
+                                        } else {
+                                            const ringIndex = Math.min(
+                                                Math.floor(i / NOTES_PER_RING),
+                                                RING_RADII.length - 1
+                                            );
+                                            const startInRing = ringIndex * NOTES_PER_RING;
+                                            const countInRing = Math.min(
+                                                NOTES_PER_RING,
+                                                n - startInRing
+                                            );
+                                            const positionInRing = i - startInRing;
+                                            angle = countInRing > 0
+                                                ? ((positionInRing + 0.5) / countInRing) * 2 * Math.PI
+                                                : 0;
+                                            radius = RING_RADII[ringIndex];
+                                        }
                                         const xPx = Math.round(radius * Math.cos(angle));
                                         const yPx = Math.round(-radius * Math.sin(angle));
                                         return (
@@ -331,7 +491,8 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
                                                     className={homeStyles.feedCard}
                                                     data-emotion={rec.emotion || "Misc"}
                                                     onClick={(e) => openNotePopup(rec, e)}
-                                                    aria-label="Open folded note"
+                                                    aria-label="Open note"
+                                                    title="Tap to open note"
                                                 >
                                                     <span className={homeStyles.feedCardEnvelope} aria-hidden>
                                                         <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -350,6 +511,103 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
                                 </p>
                             )}
                         </div>
+                    </aside>
+
+                    <aside className={homeStyles.homeCalendarColumn} aria-label="Calendar and filters">
+                        <section className={homeStyles.circleFilterSection} aria-label="Filter circle view">
+                            <span className={homeStyles.circleFilterLabel}>Filters</span>
+                            <div className={homeStyles.circleFilterRow}>
+                                <button
+                                    type="button"
+                                    className={circleFilter === "all" ? homeStyles.circleFilterActive : homeStyles.circleFilterBtn}
+                                    onClick={() => setCircleFilter("all")}
+                                    aria-pressed={circleFilter === "all"}
+                                >
+                                    All
+                                </button>
+                                <button
+                                    type="button"
+                                    className={circleFilter === "week" ? homeStyles.circleFilterActive : homeStyles.circleFilterBtn}
+                                    onClick={() => setCircleFilter("week")}
+                                    aria-pressed={circleFilter === "week"}
+                                >
+                                    This week
+                                </button>
+                                <button
+                                    type="button"
+                                    className={circleFilter === "month" ? homeStyles.circleFilterActive : homeStyles.circleFilterBtn}
+                                    onClick={() => setCircleFilter("month")}
+                                    aria-pressed={circleFilter === "month"}
+                                >
+                                    This month
+                                </button>
+                            </div>
+                        </section>
+                        <section className={settingsStyles.calendarSection} aria-label="My Memories calendar">
+                            <h2 className={settingsStyles.calendarTitle}>My Memories</h2>
+                            <div className={settingsStyles.calendarMonthNav}>
+                                <button
+                                    type="button"
+                                    className={settingsStyles.calendarNavBtn}
+                                    onClick={prevMonth}
+                                    aria-label="Previous month"
+                                >
+                                    ‹
+                                </button>
+                                <span className={settingsStyles.calendarMonthLabel}>{monthLabel}</span>
+                                <button
+                                    type="button"
+                                    className={settingsStyles.calendarNavBtn}
+                                    onClick={nextMonth}
+                                    aria-label="Next month"
+                                >
+                                    ›
+                                </button>
+                            </div>
+                            <div className={settingsStyles.calendarWeekdays} role="row">
+                                {WEEKDAYS.map((d) => (
+                                    <span key={d} className={settingsStyles.calendarWeekday} role="columnheader">
+                                        {d}
+                                    </span>
+                                ))}
+                            </div>
+                            <div className={settingsStyles.calendarGrid} role="grid">
+                                {calendarDays.map(({ day, dateKey }, i) => (
+                                    <div
+                                        key={i}
+                                        className={settingsStyles.calendarDay}
+                                        data-has-note={dateKey && notesByDate[dateKey] ? "true" : undefined}
+                                        data-emotion={dateKey && notesByDate[dateKey] ? notesByDate[dateKey] : undefined}
+                                        role="gridcell"
+                                    >
+                                        {day > 0 && (
+                                            <>
+                                                {notesByDate[dateKey] && (
+                                                    <span className={settingsStyles.calendarEmotionBg} aria-hidden />
+                                                )}
+                                                <span className={settingsStyles.calendarDayNum}>{day}</span>
+                                            </>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </section>
+                        <section className={homeStyles.emotionForDaySection} aria-label="Your emotion for the day">
+                            <h2 className={homeStyles.emotionForDayTitle}>Your emotion for the day</h2>
+                            {todayEmotion ? (
+                                <span
+                                    className={homeStyles.emotionForDayPill}
+                                    data-emotion={todayEmotion}
+                                    aria-label={`Today's mood: ${todayEmotion}`}
+                                >
+                                    {todayEmotion}
+                                </span>
+                            ) : (
+                                <p className={homeStyles.emotionForDayEmpty}>
+                                    Add a recording to add your mood for the day.
+                                </p>
+                            )}
+                        </section>
                     </aside>
                 </main>
 
