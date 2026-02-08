@@ -5,6 +5,16 @@ import { Fredoka, Nunito } from "next/font/google";
 import styles from "@/styles/Generate.module.css";
 import settingsStyles from "@/styles/Settings.module.css";
 
+import clientPromise from "../lib/mongodb";
+
+export default async function handler(req, res) {
+    const client = await clientPromise;
+    const db = client.db("myDatabase");
+
+    const notes = await db.collection("notes").find({}).toArray();
+    res.status(200).json(notes);
+}
+
 const fredoka = Fredoka({
   variable: "--font-fredoka",
   subsets: ["latin"],
