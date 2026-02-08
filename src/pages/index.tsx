@@ -36,9 +36,11 @@ export default function Home() {
           <span className={styles.blob1} />
           <span className={styles.blob2} />
           <span className={styles.blob3} />
+          <span className={styles.blob4} />
+          <span className={styles.blob5} />
         </div>
+        <div className={styles.rainbowArc} aria-hidden />
         <main className={styles.main}>
-          <div className={styles.rainbowStrip} aria-hidden />
           <div className={styles.intro}>
             <h1 className={styles.heading}>
               <span className={styles.headingWord}>Folded</span>

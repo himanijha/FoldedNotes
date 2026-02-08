@@ -245,8 +245,7 @@ export default function GenerateFromTranscript({
       {voices.length > 0 && (
         <>
           <p className={styles.voiceHint}>
-            Add <code>[chuckle]</code>, <code>[sigh]</code>, <code>[laughter]</code> for sound effects{" "}
-            <span className={styles.sparkleIcon} aria-hidden />
+            Add <code>[chuckle]</code>, <code>[sigh]</code>, <code>[laughter]</code> for sound effects ✨
           </p>
           <div className={styles.voiceSelects}>
             <label className={styles.voiceLabel}>
@@ -289,13 +288,12 @@ export default function GenerateFromTranscript({
         onClick={generateAudio}
         disabled={generatingAudio || !transcript.trim()}
       >
-        <span className={styles.micIcon} aria-hidden />
-        {generatingAudio ? "Creating your audio…" : "Give it a voice"}
+        {generatingAudio ? "Generating…" : "Generate audio from transcript"}
       </button>
 
       {generatedAudioUrl && (
         <div className={styles.generatedAudio}>
-          <p className={styles.stickerLabel}>Listen!</p>
+          <p className={styles.submittedLabel}>Generated audio</p>
           <audio
             className={styles.audio}
             src={generatedAudioUrl}
@@ -306,7 +304,6 @@ export default function GenerateFromTranscript({
       )}
 
       <Link href="/" className={styles.againButton} style={{ textDecoration: "none", textAlign: "center" }}>
-        <span className={styles.arrowLeftIcon} aria-hidden />
         Back to record
       </Link>
     </div>
