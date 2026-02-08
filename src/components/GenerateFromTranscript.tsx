@@ -229,12 +229,12 @@ export default function GenerateFromTranscript({
         </p>
       )}
 
-      <p className={styles.submittedLabel}>Transcript</p>
+      <p className={styles.stickerLabel}>Your words</p>
       <textarea
         className={styles.transcriptInput}
         value={transcript}
         onChange={(e) => setTranscript(e.target.value)}
-        placeholder="Paste or edit transcript…"
+        placeholder="Paste or tweak your note…"
         rows={5}
         aria-label="Transcript"
       />
@@ -245,7 +245,8 @@ export default function GenerateFromTranscript({
       {voices.length > 0 && (
         <>
           <p className={styles.voiceHint}>
-            Use <code>[chuckle]</code>, <code>[sigh]</code>, <code>[laughter]</code> etc. to insert a sound effect (ElevenLabs).
+            Add <code>[chuckle]</code>, <code>[sigh]</code>, <code>[laughter]</code> for sound effects{" "}
+            <span className={styles.sparkleIcon} aria-hidden />
           </p>
           <div className={styles.voiceSelects}>
             <label className={styles.voiceLabel}>
@@ -288,12 +289,13 @@ export default function GenerateFromTranscript({
         onClick={generateAudio}
         disabled={generatingAudio || !transcript.trim()}
       >
-        {generatingAudio ? "Generating…" : "Generate audio from transcript"}
+        <span className={styles.micIcon} aria-hidden />
+        {generatingAudio ? "Creating your audio…" : "Give it a voice"}
       </button>
 
       {generatedAudioUrl && (
         <div className={styles.generatedAudio}>
-          <p className={styles.submittedLabel}>Generated audio</p>
+          <p className={styles.stickerLabel}>Listen!</p>
           <audio
             className={styles.audio}
             src={generatedAudioUrl}
@@ -304,6 +306,7 @@ export default function GenerateFromTranscript({
       )}
 
       <Link href="/" className={styles.againButton} style={{ textDecoration: "none", textAlign: "center" }}>
+        <span className={styles.arrowLeftIcon} aria-hidden />
         Back to record
       </Link>
     </div>

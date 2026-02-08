@@ -47,12 +47,16 @@ export default function GeneratePage() {
           <span className={styles.blob3} />
         </div>
         <main className={styles.main}>
+          <div className={styles.rainbowStrip} aria-hidden />
           <div className={styles.intro}>
             <h1 className={styles.heading}>
               <span className={styles.headingWord}>Folded</span>
               <span className={styles.headingWord}>Notes</span>
             </h1>
-            <p className={styles.tagline}>Generate audio from your transcript.</p>
+            <p className={styles.tagline}>
+              <span className={styles.taglineMic} aria-hidden />
+              Give your note a voice
+            </p>
           </div>
 
           {!mounted ? (
@@ -63,9 +67,10 @@ export default function GeneratePage() {
               initialLanguageCode={stored.language_code}
             />
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px", alignItems: "center" }}>
-              <p>No transcript found. Record first, then come back here.</p>
+            <div className={styles.emptyState}>
+              <p>No note yet! Record something first, then come back.</p>
               <Link href="/" className={styles.againButton} style={{ textDecoration: "none" }}>
+                <span className={styles.pencilIcon} aria-hidden />
                 Record a message
               </Link>
             </div>
