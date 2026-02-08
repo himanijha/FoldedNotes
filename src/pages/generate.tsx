@@ -3,7 +3,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Fredoka, Nunito } from "next/font/google";
-import styles from "@/styles/Home.module.css";
+import styles from "@/styles/Generate.module.css";
 import { getStoredTranscript } from "@/components/GenerateFromTranscript";
 
 const fredoka = Fredoka({
