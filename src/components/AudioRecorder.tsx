@@ -9,9 +9,10 @@ type RecordingState = "idle" | "recording" | "recorded" | "submitted" | "error";
 type AudioRecorderProps = {
   onTranscriptReady?: (text: string) => void;
   onEmotionReady?: (emotion: string) => void;
+  onSubmitted?: () => void;
 };
 
-export default function AudioRecorder({ onTranscriptReady, onEmotionReady }: AudioRecorderProps) {
+export default function AudioRecorder({ onTranscriptReady, onEmotionReady, onSubmitted }: AudioRecorderProps) {
   const [state, setState] = useState<RecordingState>("idle");
   const [error, setError] = useState<string | null>(null);
   const [duration, setDuration] = useState(0);
@@ -245,6 +246,7 @@ export default function AudioRecorder({ onTranscriptReady, onEmotionReady }: Aud
               setEmotionResult(emotion);
               onEmotionReady?.(emotion);
             }
+            onSubmitted?.();
           } catch (err) {
             const elapsed = Date.now() - start;
             const wait = Math.max(0, SENDING_MIN_MS - elapsed);
@@ -256,7 +258,7 @@ export default function AudioRecorder({ onTranscriptReady, onEmotionReady }: Aud
               requestAnimationFrame(() => setSubmitting(false));
             });
           }
-  }, []);
+  }, [onSubmitted]);
 
 
 

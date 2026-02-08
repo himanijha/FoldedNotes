@@ -76,7 +76,7 @@ export default function Login() {
             const data = res.ok ? await res.json().catch(() => ({})) : null;
             if (res.ok && data?.ok !== false) {
                 if (data?.token) localStorage.setItem("auth_token", data.token);
-                router.push("/");
+                router.push("/home");
                 return;
             }
             setErrors({ password: "Invalid email or password" });
@@ -113,7 +113,7 @@ export default function Login() {
             const data = res.ok ? await res.json().catch(() => ({})) : null;
             if (res.ok && data?.ok !== false) {
                 if (data?.token) localStorage.setItem("auth_token", data.token);
-                router.push("/");
+                router.push("/home");
                 return;
             }
             setErrors({ email: data?.error || "Sign up failed. Try again." });
@@ -134,7 +134,7 @@ export default function Login() {
         } catch {
             // continue to home
         }
-        router.push("/");
+        router.push("/home");
     };
 
     const switchMode = () => {

@@ -18,8 +18,7 @@ export default async function handler(req, res) {
             const cursor = db
                 .collection("notes")
                 .find({})
-                .sort({ date: -1 })
-                .limit(100);
+                .sort({ date: -1 });
             const raw = await cursor.toArray();
             const notes = raw.map(({ _id, ...doc }) => ({
                 ...doc,
@@ -39,9 +38,11 @@ export default async function handler(req, res) {
             const client = await clientPromise;
             const db = client.db("FoldedNotes");
 
+            const now = new Date();
             const doc = {
                 user: "username",
-                date: new Intl.DateTimeFormat("en-CA").format(new Date()),
+                date: now.toISOString(),
+                dateDay: new Intl.DateTimeFormat("en-CA").format(now),
                 text: text,
                 public: false,
                 emotion: emotion ?? null,

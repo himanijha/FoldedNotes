@@ -1,21 +1,156 @@
+/* ---------- SETTINGS PAGE LAYOUT (web app) ---------- */
+
+.settingsPage {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px 12px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.settingsLayout {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 24px 32px;
+  align-items: flex-start;
+}
+
+.settingsColumn {
+  flex: 1 1 340px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.settingsColumn > * {
+  flex-shrink: 0;
+}
+
+@media (min-width: 900px) {
+  .settingsColumn {
+    flex: 1 1 0;
+    min-width: 320px;
+  }
+}
+
+/* ---------- CARDS ---------- */
+
 .settingsCard {
   background: var(--paper);
-  border-radius: 20px;
-  padding: 32px 28px;
-  max-width: 420px;
+  border-radius: 12px;
+  padding: 24px 20px;
   width: 100%;
-  box-shadow:
-    0 4px 20px var(--paper-shadow),
-    0 1px 3px rgba(0, 0, 0, 0.06);
-  transform: rotate(-0.5deg);
+  max-width: 100%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.settingsTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
 }
 
 .settingsTitle {
   font-family: var(--font-fredoka), system-ui, sans-serif;
-  font-size: 1.5rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: var(--ink);
-  margin: 0 0 24px 0;
+  margin: 0;
+}
+
+.settingsStatusTag {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.settingsStatusTagConnected {
+  background: rgba(45, 138, 122, 0.15);
+  color: #1a4a42;
+}
+
+.settingsStatusTagDisconnected {
+  background: rgba(160, 80, 80, 0.12);
+  color: #8b3a35;
+}
+
+/* ---------- PROFILE ---------- */
+
+.profileCard {
+  background: var(--paper);
+  border-radius: 12px;
+  padding: 24px 20px;
+  width: 100%;
+  max-width: 100%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.profileCard .settingsTitle {
+  margin-bottom: 16px;
+}
+
+.profileRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.profileAvatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent) 0%, #5090c8 100%);
+  color: white;
+  font-family: var(--font-fredoka), system-ui, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.profileInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.profileStatus {
+  font-family: var(--font-fredoka), system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 4px 0;
+}
+
+.profileHint {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  line-height: 1.4;
+  margin: 0 0 8px 0;
+}
+
+.profileLink {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.profileLink:hover {
+  text-decoration: underline;
 }
 
 /* Heart: static; white pulse line (heart monitor) at pulse rate only */
@@ -141,3 +276,223 @@
   background: rgba(160, 80, 80, 0.12);
   color: #8b3a35;
 }
+
+/* ---------- REFLECTION (this week in one word) ---------- */
+
+.reflectionSection {
+  width: 100%;
+  background: var(--paper);
+  border-radius: 12px;
+  padding: 24px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  text-align: center;
+}
+
+.reflectionLead {
+  margin: 0 0 12px 0;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+.reflectionWord {
+  font-family: var(--font-fredoka), system-ui, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  display: inline-block;
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: 2px solid;
+  letter-spacing: 0.02em;
+}
+
+.reflectionEmpty {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  line-height: 1.4;
+}
+
+.reflectionMuted {
+  margin: 10px 0 0 0;
+  font-size: 0.72rem;
+  color: rgba(0, 0, 0, 0.35);
+  font-weight: 500;
+}
+
+/* ---------- EMOTION TRACKER (fun mood strip) ---------- */
+
+.emotionTrackerSection {
+  width: 100%;
+  background: var(--paper);
+  border-radius: 12px;
+  padding: 24px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.emotionTrackerTitle {
+  font-family: var(--font-fredoka), system-ui, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 20px 0;
+  text-align: center;
+}
+
+.emotionTrackerStrip {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.emotionTrackerDay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.emotionTrackerDot {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.emotionTrackerDay:hover .emotionTrackerDot {
+  transform: scale(1.1);
+}
+
+.emotionTrackerLabel {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.emotionTrackerHint {
+  margin: 16px 0 0 0;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* ---------- MEMORIES CALENDAR ---------- */
+
+.calendarSection {
+  width: 100%;
+  background: var(--paper);
+  border-radius: 12px;
+  padding: 20px 16px 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.calendarTitle {
+  font-family: var(--font-fredoka), system-ui, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 12px 0;
+  text-align: center;
+}
+
+.calendarMonthNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 0 4px;
+}
+
+.calendarNavBtn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.calendarNavBtn:hover {
+  background: rgba(45, 138, 122, 0.25);
+}
+
+.calendarMonthLabel {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.calendarWeekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 6px;
+  padding: 0 2px;
+}
+
+.calendarWeekday {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.calendarDay {
+  aspect-ratio: 1;
+  min-height: 44px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.04);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.calendarDay[data-has-note="true"] {
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 700;
+}
+
+.calendarEmotionBg {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  pointer-events: none;
+  background: #8a8a92;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.calendarDayNum {
+  position: relative;
+  z-index: 1;
+  font-size: 0.8rem;
+}
+
+.calendarDay[data-emotion="Happy"] .calendarEmotionBg { background: #c9a028; }
+.calendarDay[data-emotion="Sad"] .calendarEmotionBg { background: #4a7a98; }
+.calendarDay[data-emotion="Angry"] .calendarEmotionBg { background: #b85a52; }
+.calendarDay[data-emotion="Anxious"] .calendarEmotionBg { background: #c48848; }
+.calendarDay[data-emotion="Fear"] .calendarEmotionBg { background: #7a6a9a; }
+.calendarDay[data-emotion="Surprise"] .calendarEmotionBg { background: #5a9a7a; }
+.calendarDay[data-emotion="Love/Warmth"] .calendarEmotionBg { background: #b86a82; }
+.calendarDay[data-emotion="Misc"] .calendarEmotionBg { background: #8a8a92; }

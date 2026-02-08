@@ -187,6 +187,15 @@
     max-width: 320px;
 }
 
+.taglineLink {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.taglineLink:hover {
+    text-decoration: underline;
+}
+
 /* ---------- RECORDINGS ---------- */
 
 .recordings {
