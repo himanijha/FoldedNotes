@@ -8,10 +8,6 @@ declare global {
   var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
 
-/**
- * Cached MongoDB client promise. Reusing the same client across requests
- * avoids creating a new connection per API route (important in serverless).
- */
 let clientPromise: Promise<MongoClient>;
 
 if (process.env.NODE_ENV === "development") {
@@ -23,16 +19,10 @@ if (process.env.NODE_ENV === "development") {
   clientPromise = new MongoClient(uri).connect();
 }
 
-/**
- * Get the MongoDB client. Use this when you need the raw client.
- */
 export async function getClient(): Promise<MongoClient> {
   return clientPromise;
 }
 
-/**
- * Get the default database. Use this for most operations.
- */
 export async function getDb(): Promise<Db> {
   const client = await getClient();
   return client.db(dbName);
