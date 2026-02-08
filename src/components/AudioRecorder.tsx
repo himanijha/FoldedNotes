@@ -162,87 +162,110 @@ export default function AudioRecorder({ onTranscriptReady, onEmotionReady }: Aud
 
   const SENDING_MIN_MS = 6000;
 
-  const submitToElevenLabs = useCallback(async () => {
-    const url = audioUrlRef.current;
-    if (!url) return;
+    const submitToElevenLabs = useCallback(async () => {
+        const url = audioUrlRef.current;
+        if (!url) return;
 
-    setSubmitting(true);
-    setError(null);
-    const start = Date.now();
-    try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      const reader = new FileReader();
-      const base64 = await new Promise<string>((resolve, reject) => {
-        reader.onloadend = () => {
-          const result = reader.result as string;
-          const base64 = result.split(",")[1];
-          resolve(base64 ?? "");
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
+        setSubmitting(true);
+        setError(null);
+        const start = Date.now();
 
-      const res = await fetch("/api/transcribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          audioBase64: base64,
-          contentType: blob.type || "audio/webm",
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error ?? "Transcription failed");
-      }
-
-      const elapsed = Date.now() - start;
-      const wait = Math.max(0, SENDING_MIN_MS - elapsed);
-      await new Promise((r) => setTimeout(r, wait));
-
-      const submittedAt = new Date().toISOString();
-      setSubmitResult({
-        text: data.text ?? "",
-        language_code: data.language_code,
-        submittedAt,
-      });
-      setState("submitted");
-
-      if (onTranscriptReady && data.text) {
-        onTranscriptReady(data.text);
-      }
-
-      if (data.text?.trim()) {
         try {
-          const emotion = await classifyEmotion(data.text);
-          if (emotion) {
-            setEmotionResult(emotion);
-            onEmotionReady?.(emotion);
+            // 1️⃣ Fetch audio blob from the recorded URL
+            const response = await fetch(url);
+            const blob = await response.blob();
+
+            // 2️⃣ Convert to base64
+            const reader = new FileReader();
+            const base64 = await new Promise<string>((resolve, reject) => {
+                reader.onloadend = () => {
+                    const result = reader.result as string;
+                    resolve(result.split(",")[1] ?? "");
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            });
+
+            // 3️⃣ Send to ElevenLabs API
+            const res = await fetch("/api/transcribe", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    audioBase64: base64,
+                    contentType: blob.type || "audio/webm",
+                }),
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error ?? "Transcription failed");
+
+            const elapsed = Date.now() - start;
+            const wait = Math.max(0, SENDING_MIN_MS - elapsed);
+            if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+
+            let emotion: string | null = null;
+            if (data.text?.trim()) {
+              try {
+                emotion = await classifyEmotion(data.text);
+              } catch {
+                // ignore classification errors
+              }
+            }
+
+            try {
+              await fetch("/api/notes", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  user: "username",
+                  text: data.text ?? "",
+                  emotion: emotion ?? "Misc",
+                }),
+              });
+            } catch {
+              // don't block UI if save fails
+            }
+
+            const submittedAt = new Date().toISOString();
+            setSubmitResult({
+              text: data.text ?? "",
+              language_code: data.language_code,
+              submittedAt,
+            });
+            setState("submitted");
+
+            if (onTranscriptReady && data.text) {
+              onTranscriptReady(data.text);
+            }
+            if (emotion) {
+              setEmotionResult(emotion);
+              onEmotionReady?.(emotion);
+            }
+          } catch (err) {
+            const elapsed = Date.now() - start;
+            const wait = Math.max(0, SENDING_MIN_MS - elapsed);
+            if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+            setError(err instanceof Error ? err.message : "Failed to process recording");
+            setState("error");
+          } finally {
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => setSubmitting(false));
+            });
           }
-        } catch {
-          // ignore classification errors
-        }
-      }
-    } catch (err) {
-      const elapsed = Date.now() - start;
-      const wait = Math.max(0, SENDING_MIN_MS - elapsed);
-      await new Promise((r) => setTimeout(r, wait));
-      setError(err instanceof Error ? err.message : "Failed to process recording");
-    } finally {
-      // Hide overlay after layout has updated to submitted state so the box doesn't visibly resize
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => setSubmitting(false));
-      });
-    }
   }, []);
 
-  const goToGenerate = useCallback(() => {
-    if (!submitResult?.text) return;
-    setStoredTranscript(submitResult.text, submitResult.language_code);
-    window.location.href = "/generate";
-  }, [submitResult]);
+
+
+    const goToGenerate = useCallback(() => {
+        if (!submitResult?.text) return;
+
+        setStoredTranscript(
+            submitResult.text,
+            submitResult.language_code
+        );
+
+        window.location.href = "/generate";
+    }, [submitResult]);
 
   const reset = useCallback(() => {
     if (audioUrlRef.current) {
