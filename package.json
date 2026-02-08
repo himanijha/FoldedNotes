@@ -5,11 +5,14 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "ws-server": "node --env-file=.env.local server.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "mongodb": "^7.1.0",
+    "serialport": "^12.0.0",
+    "ws": "^8.18.0",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3"

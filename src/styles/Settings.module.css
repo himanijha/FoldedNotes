@@ -1,0 +1,91 @@
+.settingsCard {
+  background: var(--paper);
+  border-radius: 20px;
+  padding: 32px 28px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow:
+    0 4px 20px var(--paper-shadow),
+    0 1px 3px rgba(0, 0, 0, 0.06);
+  transform: rotate(-0.5deg);
+}
+
+.settingsTitle {
+  font-family: var(--font-fredoka), system-ui, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 24px 0;
+}
+
+.settingsRow {
+  margin-bottom: 20px;
+}
+
+.settingsRow:last-child {
+  margin-bottom: 0;
+}
+
+.settingsLabel {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+
+.settingsValue {
+  font-family: var(--font-fredoka), system-ui, sans-serif;
+  font-size: 0.95rem;
+  color: var(--accent);
+  margin-left: 8px;
+}
+
+.slider {
+  width: 100%;
+  height: 10px;
+  border-radius: 5px;
+  background: var(--accent-soft);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(45, 138, 122, 0.35);
+}
+
+.slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 1px 3px rgba(45, 138, 122, 0.35);
+}
+
+.status {
+  margin-top: 20px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.statusConnected {
+  background: rgba(45, 138, 122, 0.15);
+  color: #1a4a42;
+}
+
+.statusDisconnected {
+  background: rgba(160, 80, 80, 0.12);
+  color: #8b3a35;
+}
