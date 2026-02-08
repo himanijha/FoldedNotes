@@ -87,6 +87,68 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.headerAvatar:hover {
+    box-shadow: 0 0 0 3px var(--accent-soft);
+    transform: scale(1.05);
+}
+
+.headerAvatarAnon {
+    background: #b0b0b0;
+    color: #fff;
+}
+
+.headerAvatarAnon:hover {
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
+}
+
+.profileDropdownWrap {
+    position: relative;
+}
+
+.profileDropdownPanel {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 160px;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: var(--card-radius);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    padding: 6px 0;
+    z-index: 200;
+    animation: profileDropdownIn 0.15s ease;
+}
+
+@keyframes profileDropdownIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.profileDropdownItem {
+    display: block;
+    width: 100%;
+    padding: 10px 16px;
+    font-family: var(--font-nunito), system-ui, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--ink);
+    text-decoration: none;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.profileDropdownItem:hover {
+    background: var(--accent-soft);
+    color: var(--accent);
     border: 2px solid rgba(255, 255, 255, 0.9);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -723,16 +785,6 @@
 .noteSidebarPaper .writeNotePost:disabled {
     cursor: not-allowed;
     /* Keep same dark green at all times – no opacity/color change */
-}
-
-.headerProfile .anonymousBadge {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--ink-soft);
-    padding: 6px 10px;
-    border-radius: var(--input-radius);
-    background: rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .filterRow {
@@ -1423,6 +1475,21 @@
     perspective: 1400px;
     transition: opacity 0.35s ease;
 }
+
+.micIcon {
+    width: 28px;
+    height: 28px;
+    background: currentColor;
+    flex-shrink: 0;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z'/%3E%3Cpath d='M19 10v1a7 7 0 0 1-14 0v-1'/%3E%3Cline x1='12' y1='19' x2='12' y2='22'/%3E%3C/svg%3E");
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z'/%3E%3Cpath d='M19 10v1a7 7 0 0 1-14 0v-1'/%3E%3Cline x1='12' y1='19' x2='12' y2='22'/%3E%3C/svg%3E");
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+  }
 
 .notePopupOverlayClosing {
     opacity: 0;

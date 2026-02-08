@@ -303,8 +303,29 @@ export default function AudioRecorder({ onTranscriptReady, onEmotionReady, onSub
             <div className={styles.sendingWaves} />
             <div className={styles.sendingWaves2} />
             <div className={styles.sendingBottle} aria-hidden>
-              <span className={styles.bottleBody} />
-              <span className={styles.bottleNeck} />
+              <svg viewBox="0 0 60 90" fill="none" xmlns="http://www.w3.org/2000/svg" className={styles.bottleSvg}>
+                {/* Cork */}
+                <rect x="22" y="2" width="16" height="14" rx="3" fill="#c9a96e" stroke="#b08a4a" strokeWidth="1"/>
+                <rect x="24" y="4" width="12" height="3" rx="1" fill="#d4b87a" opacity="0.6"/>
+                {/* Neck */}
+                <rect x="23" y="15" width="14" height="18" rx="3" fill="url(#glassGrad)" stroke="rgba(255,255,255,0.5)" strokeWidth="0.8"/>
+                {/* Body */}
+                <path d="M18 33 Q18 30 23 30 L37 30 Q42 30 42 33 L44 72 Q44 82 30 82 Q16 82 16 72 Z" fill="url(#glassGrad)" stroke="rgba(255,255,255,0.5)" strokeWidth="0.8"/>
+                {/* Note inside */}
+                <rect x="23" y="48" width="14" height="18" rx="2" fill="#faf3e0" stroke="#d4c9a8" strokeWidth="0.7" transform="rotate(-8 30 57)"/>
+                <line x1="25" y1="53" x2="33" y2="51" stroke="#c4b896" strokeWidth="0.6" transform="rotate(-8 30 57)"/>
+                <line x1="25" y1="56" x2="35" y2="54" stroke="#c4b896" strokeWidth="0.6" transform="rotate(-8 30 57)"/>
+                <line x1="25" y1="59" x2="31" y2="57.5" stroke="#c4b896" strokeWidth="0.6" transform="rotate(-8 30 57)"/>
+                {/* Glass shine */}
+                <path d="M22 36 Q22 34 24 34 L26 34 Q24 36 24 60 L22 60 Q20 50 22 36 Z" fill="rgba(255,255,255,0.35)" rx="2"/>
+                <defs>
+                  <linearGradient id="glassGrad" x1="16" y1="15" x2="44" y2="82" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#e8f6f3" stopOpacity="0.9"/>
+                    <stop offset="40%" stopColor="#b2e0d6" stopOpacity="0.8"/>
+                    <stop offset="100%" stopColor="#7eccc0" stopOpacity="0.75"/>
+                  </linearGradient>
+                </defs>
+              </svg>
             </div>
           </div>
           <p className={styles.sendingText}>Your note is on its way</p>

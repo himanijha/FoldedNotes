@@ -1,6 +1,6 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Fredoka, Nunito } from "next/font/google";
 import styles from "@/styles/Generate.module.css";
 import loginStyles from "@/styles/Login.module.css";
@@ -56,6 +56,12 @@ export default function Login() {
     const [pronouns, setPronouns] = useState("");
     const [errors, setErrors] = useState<FormErrors>({});
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        const hasAuth = !!localStorage.getItem("auth_token");
+        if (hasAuth) router.replace("/home");
+    }, [router]);
 
     const handleLoginSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

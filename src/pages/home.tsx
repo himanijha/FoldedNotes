@@ -10,6 +10,7 @@ import { mergeAudioBlobs, segmentsToBlobs } from "@/lib/audio";
 import { majorityEmotion, emotionColorsAsGradient } from "@/lib/emotions";
 import homeStyles from "@/styles/Home.module.css";
 import settingsStyles from "@/styles/Settings.module.css";
+import recorderStyles from "@/styles/AudioRecorder.module.css";
 
 type NoteRecord = { _id: string; text?: string; date?: string; dateDay?: string; emotion?: string };
 
@@ -114,11 +115,16 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
     const [timeFilter, setTimeFilter] = useState<"all" | "yesterday" | "week" | "month">("all");
     const [emotionDropdownOpen, setEmotionDropdownOpen] = useState(false);
     const emotionDropdownRef = useRef<HTMLDivElement>(null);
+    const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+    const profileDropdownRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
             if (emotionDropdownRef.current && !emotionDropdownRef.current.contains(e.target as Node)) {
                 setEmotionDropdownOpen(false);
+            }
+            if (profileDropdownRef.current && !profileDropdownRef.current.contains(e.target as Node)) {
+                setProfileDropdownOpen(false);
             }
         };
         document.addEventListener("mousedown", handleClickOutside);
@@ -389,7 +395,7 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
         <>
             <Head>
                 <title>FoldedNotes – Home</title>
-                <meta name="description" content="Anonymous voice notes — no account, no trace." />
+                <meta name="description" content="Anonymous voice notes, no account, no trace." />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
             </Head>
 
@@ -408,33 +414,61 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
                     </Link>
 
                     <div className={homeStyles.headerProfile}>
-                        {avatarLetter === "Y" ? (
-                            <span className={homeStyles.anonymousBadge} aria-hidden>Anonymous</span>
-                        ) : (
-                            <span className={homeStyles.headerAvatar} aria-hidden title={username || "Profile"}>{avatarLetter}</span>
-                        )}
                         <span className={homeStyles.headerCurrent} aria-current="page">Home</span>
-                        <Link href="/settings" className={homeStyles.headerProfileLink} aria-label="Settings">
-                            Settings
-                        </Link>
-                        {isSignedIn && (
+                        <div className={homeStyles.profileDropdownWrap} ref={profileDropdownRef}>
                             <button
                                 type="button"
-                                onClick={handleLogout}
-                                className={homeStyles.headerProfileLink}
-                                style={{ background: "none", border: "none", padding: 0, cursor: "pointer", fontFamily: "inherit" }}
-                                aria-label="Log out"
+                                className={`${homeStyles.headerAvatar} ${!isSignedIn ? homeStyles.headerAvatarAnon : ""}`}
+                                onClick={() => setProfileDropdownOpen((o) => !o)}
+                                aria-expanded={profileDropdownOpen}
+                                aria-haspopup="menu"
+                                aria-label="Profile menu"
+                                title={isSignedIn ? (username || "Profile") : "Anonymous"}
                             >
-                                Log out
+                                {isSignedIn ? avatarLetter : "A"}
                             </button>
-                        )}
+                            {profileDropdownOpen && (
+                                <div className={homeStyles.profileDropdownPanel} role="menu">
+                                    <Link
+                                        href="/settings"
+                                        className={homeStyles.profileDropdownItem}
+                                        role="menuitem"
+                                        onClick={() => setProfileDropdownOpen(false)}
+                                    >
+                                        Settings
+                                    </Link>
+                                    {isSignedIn ? (
+                                        <button
+                                            type="button"
+                                            className={homeStyles.profileDropdownItem}
+                                            role="menuitem"
+                                            onClick={() => {
+                                                setProfileDropdownOpen(false);
+                                                handleLogout();
+                                            }}
+                                        >
+                                            Log out
+                                        </button>
+                                    ) : (
+                                        <Link
+                                            href="/login"
+                                            className={homeStyles.profileDropdownItem}
+                                            role="menuitem"
+                                            onClick={() => setProfileDropdownOpen(false)}
+                                        >
+                                            Sign in
+                                        </Link>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </header>
 
                 <main className={homeStyles.mainFull}>
                     <aside className={homeStyles.noteSidebar} aria-label="Notes">
                         <h2 className={homeStyles.homeColTitle}>Notes</h2>
-                        {/* <p className={homeStyles.anonymousTagline}>Your private notes — no account, no trace.</p> */}
+                        {/* <p className={homeStyles.anonymousTagline}>Your private notes, no account, no trace.</p> */}
                         <div className={homeStyles.noteSidebarPaper} aria-label="Write a note">
                             <div className={homeStyles.noteSidebarTape} aria-hidden />
                             <label htmlFor="write-note-input" className={homeStyles.writeNoteLabel}>
@@ -561,20 +595,7 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
                                 onClick={() => setShowRecordOverlay(true)}
                                 aria-label="Record a note"
                             >
-                                <svg
-                                    className={homeStyles.recordFabIcon}
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    aria-hidden
-                                >
-                                    <path d="M12 2a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z" />
-                                    <path d="M19 10v1a7 7 0 0 1-14 0v-1" />
-                                    <line x1="12" y1="19" x2="12" y2="22" />
-                                </svg>
+                                <span className={recorderStyles.micIcon} aria-hidden />
                             </button>
                             {allNotesForCircle.length > 0 ? (
                                 <ul className={homeStyles.feedList}>

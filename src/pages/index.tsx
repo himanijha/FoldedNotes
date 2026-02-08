@@ -1,62 +1,24 @@
 "use client";
 
-import Head from "next/head";
-import dynamic from "next/dynamic";
-import { Fredoka, Nunito } from "next/font/google";
-import styles from "@/styles/Generate.module.css";
-
-const fredoka = Fredoka({
-  variable: "--font-fredoka",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-});
-
-const nunito = Nunito({
-  variable: "--font-nunito",
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
-});
-
-const AudioRecorder = dynamic(
-  () => import("@/components/AudioRecorder"),
-  { ssr: false }
-);
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 
 export default function IndexPage() {
-  return (
-    <>
-      <Head>
-        <title>FoldedNotes – Leave a message of hope</title>
-        <meta
-          name="description"
-          content="Leave anonymous messages of hope, tips, and stories for others."
-        />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <div className={`${styles.page} ${fredoka.variable} ${nunito.variable}`}>
-        <div className={styles.bgBlobs} aria-hidden>
-          <span className={styles.blob1} />
-          <span className={styles.blob2} />
-          <span className={styles.blob3} />
-          <span className={styles.blob4} />
-          <span className={styles.blob5} />
-        </div>
-        <div className={styles.rainbowArc} aria-hidden />
-        <main className={styles.main}>
-          <div className={styles.intro}>
-            <h1 className={styles.heading}>
-              <span className={styles.headingWord}>Folded</span>
-              <span className={styles.headingWord}>Notes</span>
-            </h1>
-            <p className={styles.tagline}>
-              Record a message of hope, a tip, or something you went
-              through for anyone who needs to hear it.
-            </p>
-          </div>
-          <AudioRecorder />
-        </main>
-      </div>
-    </>
-  );
+  const router = useRouter();
+  const [checked, setChecked] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const hasAuth = !!localStorage.getItem("auth_token");
+    const hasAnon = !!localStorage.getItem("anon_id");
+    if (hasAuth || hasAnon) {
+      router.replace("/home");
+    } else {
+      router.replace("/login");
+    }
+    setChecked(true);
+  }, [router]);
+
+  if (!checked) return null;
+  return null;
 }
