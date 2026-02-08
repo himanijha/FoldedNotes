@@ -391,7 +391,7 @@ export default function AudioRecorder({ onTranscriptReady, onEmotionReady }: Aud
             </p>
           )}
           {emotionResult && (
-            <div className={styles.emotionResult}>
+            <div className={styles.emotionResult} data-emotion={emotionResult}>
               <span className={styles.emotionLabel}>Detected emotion</span>
               <span className={styles.emotionValue}>{emotionResult}</span>
             </div>

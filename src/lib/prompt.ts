@@ -11,6 +11,7 @@ ${EMOTIONS.join(", ")}
 Definitions:
 - Angry: irritation, frustration, resentment, rage
 - Anxious: worry, nervousness, unease, panic
+- Sad: sadness, grief, sorrow, melancholy, low mood
 - Happy: joy, excitement, contentment
 - Fear: dread, threat, feeling unsafe
 - Surprise: shock, disbelief, unexpected reaction
