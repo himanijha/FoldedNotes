@@ -1,9 +1,10 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-if (!(process.env.GEMINI_API_KEY)) {
-  throw new Error("GEMINI_API_KEY is not set");
-}
+const apiKey = process.env.GEMINI_API_KEY?.trim();
 
-export const genAI = new GoogleGenerativeAI(
-  process.env.GEMINI_API_KEY
-);
+export const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
+
+export function getGenAI(): GoogleGenerativeAI {
+  if (!genAI) throw new Error("GEMINI_API_KEY is not set");
+  return genAI;
+}

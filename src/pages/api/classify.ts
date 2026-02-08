@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { genAI } from "../../lib/gemini";
+import { getGenAI } from "../../lib/gemini";
 import { emotionPrompt } from "../../lib/prompt";
 
 export default async function handler(
@@ -16,21 +16,42 @@ export default async function handler(
     return res.status(400).json({ error: "Invalid input" });
   }
 
+  let genAI;
+  try {
+    genAI = getGenAI();
+  } catch (err) {
+    return res
+      .status(503)
+      .json({ error: "GEMINI_API_KEY is not set. Add it to .env.local to use classification." });
+  }
+
   const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-flash",
+    model: "gemini-2.5-flash",
   });
 
   const result = await model.generateContent(
     emotionPrompt(text)
   );
 
-  let parsed;
+  const rawText = result.response.text().trim();
+
+  function extractJson(s: string): unknown {
+    const trimmed = s.trim();
+    const jsonBlock = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/);
+    const toParse = jsonBlock ? jsonBlock[1].trim() : trimmed;
+    return JSON.parse(toParse);
+  }
+
+  let parsed: unknown;
   try {
-    parsed = JSON.parse(result.response.text());
+    parsed = extractJson(rawText);
   } catch {
     return res
       .status(500)
-      .json({ error: "Invalid Gemini response" });
+      .json({
+        error: "Invalid Gemini response",
+        detail: rawText.slice(0, 200),
+      });
   }
 
   return res.status(200).json(parsed);
