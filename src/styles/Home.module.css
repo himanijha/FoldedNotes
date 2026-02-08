@@ -354,7 +354,6 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
-    max-height: 320px;
 }
 
 .myNotesTitle {
@@ -397,22 +396,72 @@
     border-radius: 3px;
 }
 
+/* Note card: paper look with emotion color + tape */
 .myNotesItem {
+    position: relative;
     display: block;
     width: 100%;
     text-align: left;
-    padding: 12px 14px;
-    border-radius: var(--input-radius);
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    background: rgba(255, 255, 255, 0.6);
+    padding: 14px 14px 12px 14px;
+    padding-top: 20px;
+    border-radius: 2px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
     cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease;
+    transition: box-shadow 0.2s ease, transform 0.15s ease;
     font-family: var(--font-nunito), system-ui, sans-serif;
 }
 
 .myNotesItem:hover {
-    background: rgba(255, 255, 255, 0.9);
-    border-color: var(--accent-border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+    transform: translateY(-1px);
+}
+
+/* Tape strip at top */
+.myNotesItemTape {
+    position: absolute;
+    top: -2px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-1.5deg);
+    width: 72%;
+    height: 22px;
+    background: rgba(252, 248, 238, 0.92);
+    border: 1px solid rgba(200, 190, 165, 0.35);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    pointer-events: none;
+}
+
+/* Emotion-colored paper (soft tint) */
+.myNotesItem[data-emotion="Happy"] {
+    background: linear-gradient(180deg, rgba(201, 160, 40, 0.18) 0%, rgba(255, 250, 235, 0.95) 100%);
+}
+
+.myNotesItem[data-emotion="Sad"] {
+    background: linear-gradient(180deg, rgba(74, 122, 152, 0.18) 0%, rgba(240, 248, 252, 0.95) 100%);
+}
+
+.myNotesItem[data-emotion="Angry"] {
+    background: linear-gradient(180deg, rgba(184, 90, 82, 0.18) 0%, rgba(255, 242, 240, 0.95) 100%);
+}
+
+.myNotesItem[data-emotion="Anxious"] {
+    background: linear-gradient(180deg, rgba(196, 136, 72, 0.18) 0%, rgba(255, 248, 238, 0.95) 100%);
+}
+
+.myNotesItem[data-emotion="Fear"] {
+    background: linear-gradient(180deg, rgba(122, 106, 154, 0.18) 0%, rgba(248, 246, 252, 0.95) 100%);
+}
+
+.myNotesItem[data-emotion="Surprise"] {
+    background: linear-gradient(180deg, rgba(90, 154, 122, 0.18) 0%, rgba(238, 252, 245, 0.95) 100%);
+}
+
+.myNotesItem[data-emotion="Love/Warmth"] {
+    background: linear-gradient(180deg, rgba(184, 106, 130, 0.18) 0%, rgba(255, 242, 248, 0.95) 100%);
+}
+
+.myNotesItem[data-emotion="Misc"] {
+    background: linear-gradient(180deg, rgba(138, 138, 146, 0.12) 0%, rgba(250, 250, 252, 0.95) 100%);
 }
 
 .myNotesItemPreview {
@@ -436,19 +485,132 @@
     box-shadow: var(--card-shadow), var(--card-shadow-border);
 }
 
+.circleFilterTitleRow {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
 .circleFilterLabel {
-    display: block;
     font-family: var(--font-fredoka), system-ui, sans-serif;
     font-size: 0.95rem;
     font-weight: 600;
     color: var(--ink);
-    margin-bottom: 10px;
+}
+
+.circleFilterClearLink {
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: var(--font-nunito), system-ui, sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+    text-decoration: underline;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.circleFilterClearLink:hover:not(:disabled) {
+    color: var(--ink);
+}
+
+.circleFilterClearLink:disabled {
+    opacity: 0.5;
+    cursor: default;
+    text-decoration: none;
 }
 
 .circleFilterRow {
     display: flex;
     flex-wrap: wrap;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.circleFilterDropdownWrap {
+    position: relative;
+}
+
+.circleFilterDropdownBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: var(--input-radius);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.8);
+    font-family: var(--font-nunito), system-ui, sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    min-width: 120px;
+    justify-content: space-between;
+}
+
+.circleFilterDropdownBtn:hover {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: var(--accent-border);
+}
+
+.circleFilterDropdownChevron {
+    font-size: 0.65rem;
+    opacity: 0.7;
+}
+
+.circleFilterDropdownPanel {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 4px;
+    padding: 8px;
+    background: var(--card-bg);
+    border-radius: var(--input-radius);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.06);
+    z-index: 100;
+    min-width: 160px;
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.circleFilterDropdownOption {
+    display: flex;
+    align-items: center;
     gap: 8px;
+    padding: 6px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: var(--font-nunito), system-ui, sans-serif;
+    font-size: 0.88rem;
+    color: var(--ink);
+}
+
+.circleFilterDropdownOption:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.circleFilterDropdownOption input {
+    margin: 0;
+}
+
+.circleFilterTimeSelect {
+    padding: 8px 12px;
+    border-radius: var(--input-radius);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.8);
+    font-family: var(--font-nunito), system-ui, sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    min-width: 120px;
+}
+
+.circleFilterTimeSelect:hover {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: var(--accent-border);
 }
 
 .circleFilterBtn,
@@ -727,6 +889,13 @@
 .feedAndRecord .feedList .feedCard,
 .feedAndRecord .feedList .feedCard[data-emotion] {
     box-shadow: var(--circle-shadow);
+}
+
+.feedCardGrayed,
+.feedCard[data-filtered-out="true"] {
+    opacity: 0.35;
+    filter: grayscale(0.85);
+    pointer-events: auto;
 }
 
 /* Moodboard: circular bubbles (grid fallback when not in feedAndRecord) */

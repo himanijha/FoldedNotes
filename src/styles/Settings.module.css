@@ -12,6 +12,14 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-section);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.settingsPage::-webkit-scrollbar {
+  display: none;
 }
 
 .settingsLayout {
@@ -125,6 +133,20 @@
 .profileInfo {
   flex: 1;
   min-width: 0;
+}
+
+.profileUsername {
+  font-family: var(--font-fredoka), system-ui, sans-serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 2px 0;
+}
+
+.profilePronouns {
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  margin: 0 0 8px 0;
 }
 
 .profileStatus {
@@ -302,8 +324,13 @@
   display: inline-block;
   padding: 10px 20px;
   border-radius: 999px;
-  border: 2px solid;
   letter-spacing: 0.02em;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+.reflectionWordText {
+  color: rgba(255, 255, 255, 0.98);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .reflectionEmpty {

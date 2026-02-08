@@ -80,6 +80,7 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
     const [bubbleOrigin, setBubbleOrigin] = useState<{ x: number; y: number } | null>(null);
     const [isClosing, setIsClosing] = useState(false);
     const [avatarLetter, setAvatarLetter] = useState("Y");
+    const [username, setUsername] = useState("");
     const [isSignedIn, setIsSignedIn] = useState(false);
     const [voices, setVoices] = useState<VoiceOption[]>([]);
     const [defaultVoiceId, setDefaultVoiceId] = useState<string>("");
@@ -108,7 +109,21 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
               }))
             : []
     );
-    const [circleFilter, setCircleFilter] = useState<"all" | "week" | "month">("all");
+    const EMOTION_OPTIONS = ["Happy", "Sad", "Angry", "Anxious", "Fear", "Surprise", "Love/Warmth", "Misc"] as const;
+    const [selectedEmotions, setSelectedEmotions] = useState<string[]>([]);
+    const [timeFilter, setTimeFilter] = useState<"all" | "yesterday" | "week" | "month">("all");
+    const [emotionDropdownOpen, setEmotionDropdownOpen] = useState(false);
+    const emotionDropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (emotionDropdownRef.current && !emotionDropdownRef.current.contains(e.target as Node)) {
+                setEmotionDropdownOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     useEffect(() => {
         if (typeof window === "undefined") return;
@@ -117,14 +132,71 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
         if (!userId && !anonId) router.push("/login");
         const hasAuth = !!localStorage.getItem("auth_token");
         setIsSignedIn(hasAuth);
-        setAvatarLetter(hasAuth ? "U" : "Y");
+        const currentUser = userId || anonId;
+        if (currentUser) {
+            fetchMyNotes();
+            fetchAllNotes();
+        }
     }, [router]);
+
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        const token = localStorage.getItem("auth_token");
+        const hasAuth = !!token;
+        const applyAvatar = (email: string) => {
+            const name = email ? email.split("@")[0] : "";
+            setUsername(name);
+            setAvatarLetter(name ? name.charAt(0).toUpperCase() : hasAuth ? "U" : "Y");
+        };
+        const email = localStorage.getItem("user_email") || "";
+        if (email) {
+            applyAvatar(email);
+        } else if (hasAuth && token) {
+            fetch("/api/auth/me", {
+                headers: { Authorization: `Bearer ${token}` },
+                cache: "no-store",
+            })
+                .then((r) => (r.ok ? r.json() : null))
+                .then((data) => {
+                    if (data?.email != null) {
+                        localStorage.setItem("user_email", data.email);
+                        applyAvatar(data.email);
+                    } else {
+                        applyAvatar("");
+                    }
+                })
+                .catch(() => applyAvatar(""));
+        } else {
+            applyAvatar("");
+        }
+    }, []);
+
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        const currentUser = localStorage.getItem("user_id") || localStorage.getItem("anon_id");
+        if (currentUser) {
+            fetchMyNotes();
+        }
+    }, [isSignedIn]);
+
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        const currentUser = localStorage.getItem("user_id") || localStorage.getItem("anon_id");
+        if (!currentUser) return;
+        const t = setTimeout(() => {
+            fetchMyNotes();
+        }, 200);
+        return () => clearTimeout(t);
+    }, []);
 
     const handleLogout = () => {
         if (typeof window === "undefined") return;
         localStorage.removeItem("auth_token");
         localStorage.removeItem("user_id");
+        localStorage.removeItem("user_email");
+        localStorage.removeItem("profile_pronouns");
         setIsSignedIn(false);
+        setUsername("");
         setAvatarLetter("Y");
         router.push("/login");
     };
@@ -141,10 +213,13 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
         if (typeof window === "undefined") return;
         const userId = localStorage.getItem("user_id") || localStorage.getItem("anon_id");
         if (!userId) return;
-        fetch(`/api/notes?user=${encodeURIComponent(userId)}`)
-            .then((r) => r.json())
+        fetch(`/api/notes?user=${encodeURIComponent(userId)}`, { cache: "no-store" })
+            .then((r) => {
+                if (!r.ok) throw new Error(r.statusText);
+                return r.json();
+            })
             .then((data) => {
-                const list = Array.isArray(data.notes) ? data.notes : [];
+                const list = data && Array.isArray(data.notes) ? data.notes : [];
                 setMyNotes(list.map(normalizeNote));
             })
             .catch(() => setMyNotes([]));
@@ -152,7 +227,7 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
 
     const fetchAllNotes = () => {
         if (typeof window === "undefined") return;
-        fetch("/api/notes")
+        fetch("/api/notes", { cache: "no-store" })
             .then((r) => r.json())
             .then((data) => {
                 const list = Array.isArray(data.notes) ? data.notes : [];
@@ -161,10 +236,6 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
             .catch(() => setAllNotes([]));
     };
 
-    useEffect(() => {
-        fetchMyNotes();
-        fetchAllNotes();
-    }, []);
 
     useEffect(() => {
         fetch("/api/voices")
@@ -264,18 +335,31 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
 
     const allNotesForCircle: NoteRecord[] = allNotes;
     const now = new Date();
+    const yesterdayCutoff = new Date(now);
+    yesterdayCutoff.setTime(yesterdayCutoff.getTime() - 24 * 60 * 60 * 1000);
     const weekAgo = new Date(now);
     weekAgo.setDate(weekAgo.getDate() - 7);
     const monthAgo = new Date(now);
     monthAgo.setDate(monthAgo.getDate() - 30);
 
-    const circleNotes: NoteRecord[] = allNotesForCircle.filter((n) => {
-        if (!n.date) return true;
-        const d = new Date(n.date);
-        if (circleFilter === "week") return d >= weekAgo;
-        if (circleFilter === "month") return d >= monthAgo;
+    const passesTimeFilter = (note: NoteRecord): boolean => {
+        if (timeFilter === "all") return true;
+        if (!note.date) return false;
+        const d = new Date(note.date);
+        if (timeFilter === "yesterday") return d >= yesterdayCutoff;
+        if (timeFilter === "week") return d >= weekAgo;
+        if (timeFilter === "month") return d >= monthAgo;
         return true;
-    });
+    };
+
+    const passesEmotionFilter = (note: NoteRecord): boolean => {
+        if (selectedEmotions.length === 0) return true;
+        const emotion = note.emotion ?? "Misc";
+        return selectedEmotions.includes(emotion);
+    };
+
+    const passesFilter = (note: NoteRecord): boolean =>
+        passesEmotionFilter(note) && passesTimeFilter(note);
 
     const emotionsByDate: Record<string, string[]> = {};
     myNotes.forEach((n: NoteRecord) => {
@@ -327,7 +411,7 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
                         {avatarLetter === "Y" ? (
                             <span className={homeStyles.anonymousBadge} aria-hidden>Anonymous</span>
                         ) : (
-                            <span className={homeStyles.headerAvatar} aria-hidden title="Profile">{avatarLetter}</span>
+                            <span className={homeStyles.headerAvatar} aria-hidden title={username || "Profile"}>{avatarLetter}</span>
                         )}
                         <span className={homeStyles.headerCurrent} aria-current="page">Home</span>
                         <Link href="/settings" className={homeStyles.headerProfileLink} aria-label="Settings">
@@ -394,11 +478,12 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
                                         } catch {
                                             /* use Misc if Gemini classification fails */
                                         }
-                                        const userId = typeof window !== "undefined" ? (localStorage.getItem("user_id") || localStorage.getItem("anon_id")) : null;
+                                        const currentUserId = typeof window !== "undefined" ? (localStorage.getItem("user_id") || localStorage.getItem("anon_id")) : null;
                                         const res = await fetch("/api/notes", {
                                             method: "POST",
                                             headers: { "Content-Type": "application/json" },
-                                            body: JSON.stringify({ user: userId || "anonymous", text, emotion }),
+                                            body: JSON.stringify({ userId: currentUserId || "anonymous", text, emotion }),
+                                            cache: "no-store",
                                         });
                                         const data = await res.json().catch(() => ({}));
                                         if (!res.ok) throw new Error(data.error || "Failed to post");
@@ -447,6 +532,7 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
                                                 onClick={(e) => openNotePopup(note, e)}
                                                 data-emotion={note.emotion || "Misc"}
                                             >
+                                                <span className={homeStyles.myNotesItemTape} aria-hidden />
                                                 <span className={homeStyles.myNotesItemPreview}>
                                                     {note.text ? (note.text.length > 60 ? `${note.text.slice(0, 60)}…` : note.text) : "No content"}
                                                 </span>
@@ -490,13 +576,14 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
                                     <line x1="12" y1="19" x2="12" y2="22" />
                                 </svg>
                             </button>
-                            {circleNotes.length > 0 ? (
+                            {allNotesForCircle.length > 0 ? (
                                 <ul className={homeStyles.feedList}>
-                                    {circleNotes.map((rec: NoteRecord, i: number) => {
+                                    {allNotesForCircle.map((rec: NoteRecord, i: number) => {
                                         const NOTES_PER_RING = 12;
                                         const SINGLE_RING_RADIUS = 180;
                                         const RING_RADII = [130, 190, 250];
-                                        const n = circleNotes.length;
+                                        const n = allNotesForCircle.length;
+                                        const isFilteredOut = !passesFilter(rec);
                                         let radius: number;
                                         let angle: number;
                                         if (n <= NOTES_PER_RING) {
@@ -533,8 +620,9 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
                                             >
                                                 <button
                                                     type="button"
-                                                    className={homeStyles.feedCard}
+                                                    className={`${homeStyles.feedCard} ${isFilteredOut ? homeStyles.feedCardGrayed : ""}`}
                                                     data-emotion={rec.emotion || "Misc"}
+                                                    data-filtered-out={isFilteredOut ? "true" : undefined}
                                                     onClick={(e) => openNotePopup(rec, e)}
                                                     aria-label="Open note"
                                                     title="Tap to open note"
@@ -560,32 +648,66 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
 
                     <aside className={homeStyles.homeCalendarColumn} aria-label="Calendar and filters">
                         <section className={homeStyles.circleFilterSection} aria-label="Filter circle view">
-                            <span className={homeStyles.circleFilterLabel}>Filters</span>
+                            <div className={homeStyles.circleFilterTitleRow}>
+                                <span className={homeStyles.circleFilterLabel}>Filters</span>
+                                <button
+                                    type="button"
+                                    className={homeStyles.circleFilterClearLink}
+                                    onClick={() => {
+                                        setSelectedEmotions([]);
+                                        setTimeFilter("all");
+                                        setEmotionDropdownOpen(false);
+                                    }}
+                                    disabled={selectedEmotions.length === 0 && timeFilter === "all"}
+                                    aria-label="Clear all filters"
+                                >
+                                    Clear all filters
+                                </button>
+                            </div>
                             <div className={homeStyles.circleFilterRow}>
-                                <button
-                                    type="button"
-                                    className={circleFilter === "all" ? homeStyles.circleFilterActive : homeStyles.circleFilterBtn}
-                                    onClick={() => setCircleFilter("all")}
-                                    aria-pressed={circleFilter === "all"}
+                                <div className={homeStyles.circleFilterDropdownWrap} ref={emotionDropdownRef}>
+                                    <button
+                                        type="button"
+                                        className={homeStyles.circleFilterDropdownBtn}
+                                        onClick={() => setEmotionDropdownOpen((o) => !o)}
+                                        aria-expanded={emotionDropdownOpen}
+                                        aria-haspopup="listbox"
+                                    >
+                                        Emotion{selectedEmotions.length > 0 ? ` (${selectedEmotions.length})` : ""}
+                                        <span className={homeStyles.circleFilterDropdownChevron} aria-hidden>▼</span>
+                                    </button>
+                                    {emotionDropdownOpen && (
+                                        <div className={homeStyles.circleFilterDropdownPanel} role="listbox">
+                                            {EMOTION_OPTIONS.map((emotion) => (
+                                                <label key={emotion} className={homeStyles.circleFilterDropdownOption}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedEmotions.includes(emotion)}
+                                                        onChange={() => {
+                                                            setSelectedEmotions((prev) =>
+                                                                prev.includes(emotion)
+                                                                    ? prev.filter((e) => e !== emotion)
+                                                                    : [...prev, emotion]
+                                                            );
+                                                        }}
+                                                    />
+                                                    <span>{emotion}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                                <select
+                                    className={homeStyles.circleFilterTimeSelect}
+                                    value={timeFilter}
+                                    onChange={(e) => setTimeFilter(e.target.value as "all" | "yesterday" | "week" | "month")}
+                                    aria-label="Time range"
                                 >
-                                    All
-                                </button>
-                                <button
-                                    type="button"
-                                    className={circleFilter === "week" ? homeStyles.circleFilterActive : homeStyles.circleFilterBtn}
-                                    onClick={() => setCircleFilter("week")}
-                                    aria-pressed={circleFilter === "week"}
-                                >
-                                    This week
-                                </button>
-                                <button
-                                    type="button"
-                                    className={circleFilter === "month" ? homeStyles.circleFilterActive : homeStyles.circleFilterBtn}
-                                    onClick={() => setCircleFilter("month")}
-                                    aria-pressed={circleFilter === "month"}
-                                >
-                                    This month
-                                </button>
+                                    <option value="all">All time</option>
+                                    <option value="yesterday">Yesterday</option>
+                                    <option value="week">Last week</option>
+                                    <option value="month">Last month</option>
+                                </select>
                             </div>
                         </section>
                         <section className={settingsStyles.calendarSection} aria-label="My Memories calendar">
@@ -731,7 +853,7 @@ export default function HomePage({ recordings = [] }: { recordings?: any[] }) {
                                 )}
                             </div>
                             <div className={homeStyles.notePopupScroll}>
-                                <h2 className={homeStyles.notePopupLabel}>Your words</h2>
+                                <h2 className={homeStyles.notePopupLabel}>Note:</h2>
                                 <div className={homeStyles.notePopupTextBlock}>
                                     {selectedNote.text || "No content"}
                                 </div>

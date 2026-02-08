@@ -15,26 +15,42 @@ export default async function handler(req, res) {
                 });
             }
             const db = client.db("FoldedNotes");
-            const user = typeof req.query.user === "string" ? req.query.user.trim() : null;
-            const filter = user ? { user } : {};
+            // user id from query (logged-in user's _id or anon_id) – retrieve all notes where note.user === this id
+            const userId = typeof req.query.user === "string" ? req.query.user.trim() : null;
+            const filter = userId ? { user: userId } : {};
             const cursor = db
                 .collection("notes")
                 .find(filter)
                 .sort({ date: -1 });
             const raw = await cursor.toArray();
-            const notes = raw.map(({ _id, ...doc }) => ({
-                ...doc,
-                id: _id?.toString(),
-            }));
+            const notes = Array.isArray(raw)
+                ? raw.map(({ _id, ...doc }) => ({
+                    ...doc,
+                    id: _id != null ? String(_id) : undefined,
+                    _id: _id != null ? String(_id) : undefined,
+                }))
+                : [];
             return res.status(200).json({ notes });
         }
 
         if (req.method === "POST") {
-            const { user, text, emotion } = req.body;
-            const userId = typeof user === "string" && user.trim() ? user.trim() : "anonymous";
-            console.log("Received POST:", { user: userId, text, emotion });
+            const body = req.body && typeof req.body === "object" ? req.body : {};
+            const user = body.user;
+            const userIdBody = body.userId;
+            const text = body.text;
+            const emotion = body.emotion;
+            const userId = typeof userIdBody === "string" && userIdBody.trim()
+                ? userIdBody.trim()
+                : typeof user === "string" && user.trim()
+                    ? user.trim()
+                    : "anonymous";
+            console.log("Notes POST body:", { userId, textLength: typeof text === "string" ? text.length : 0, emotion });
 
-            if (!text) {
+            if (!text || typeof text !== "string") {
+                return res.status(400).json({ error: "Missing text" });
+            }
+            const textTrimmed = text.trim();
+            if (!textTrimmed) {
                 return res.status(400).json({ error: "Missing text" });
             }
 
@@ -42,19 +58,26 @@ export default async function handler(req, res) {
             const db = client.db("FoldedNotes");
 
             const now = new Date();
+            const dateDay = new Intl.DateTimeFormat("en-CA").format(now);
             const doc = {
                 user: userId,
                 date: now.toISOString(),
-                dateDay: new Intl.DateTimeFormat("en-CA").format(now),
-                text: text,
+                dateDay,
+                text: textTrimmed,
                 public: false,
                 emotion: emotion ?? null,
             };
 
             const result = await db.collection("notes").insertOne(doc);
-            console.log("Inserted document:", result.insertedId); // ✅ log success
-
-            return res.status(200).json({ ok: true, insertedId: result.insertedId });
+            console.log("Notes POST inserted:", result.insertedId);
+            const note = {
+                _id: result.insertedId.toString(),
+                text: doc.text,
+                date: doc.date,
+                dateDay: doc.dateDay,
+                emotion: doc.emotion,
+            };
+            return res.status(200).json({ ok: true, insertedId: result.insertedId, note });
         }
 
         return res.status(405).json({ error: "Method not allowed" });

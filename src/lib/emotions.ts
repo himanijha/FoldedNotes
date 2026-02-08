@@ -12,6 +12,18 @@ export const EMOTION_COLORS: Record<string, string> = {
   Misc: "#8a8a92",
 };
 
+/** [lighter, darker] for 135deg gradient (top-left to bottom-right) on border/text */
+export const EMOTION_GRADIENTS: Record<string, [string, string]> = {
+  Happy: ["#e0b840", "#a87a18"],
+  Sad: ["#6a9ab8", "#2a5a78"],
+  Angry: ["#d87a72", "#8a3a32"],
+  Anxious: ["#d4a068", "#9a6028"],
+  Fear: ["#9a8aba", "#5a4a7a"],
+  Surprise: ["#7aba9a", "#3a7a5a"],
+  "Love/Warmth": ["#d88aa2", "#984a62"],
+  Misc: ["#a0a0a8", "#6a6a72"],
+};
+
 const DEFAULT_COLOR = "#8a8a92";
 
 /**

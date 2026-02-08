@@ -214,21 +214,21 @@ export default function AudioRecorder({ onTranscriptReady, onEmotionReady, onSub
             }
 
             try {
-              const userId = typeof window !== "undefined"
-                ? (localStorage.getItem("user_id") || localStorage.getItem("anon_id"))
+              const currentUserId = typeof window !== "undefined"
+                ? (localStorage.getItem("user_id") || localStorage.getItem("anon_id") || "anonymous")
                 : "anonymous";
               const saveRes = await fetch("/api/notes", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                  user: userId || "anonymous",
+                  userId: currentUserId,
                   text: data.text ?? "",
                   emotion: emotion ?? "Misc",
                 }),
               });
+              const saveData = await saveRes.json().catch(() => ({}));
               if (!saveRes.ok) {
-                const errBody = await saveRes.json().catch(() => ({}));
-                console.warn("Notes save failed:", saveRes.status, errBody);
+                console.warn("Notes save failed:", saveRes.status, saveData);
               }
             } catch (e) {
               console.warn("Notes save error:", e);

@@ -37,7 +37,13 @@ export default async function handler(
 
     const userId = String(dbUser._id);
     const token = createToken({ userId, email: dbUser.email });
-    return res.status(200).json({ ok: true, token, userId, email: dbUser.email });
+    return res.status(200).json({
+      ok: true,
+      token,
+      userId,
+      email: dbUser.email,
+      pronouns: dbUser.pronouns ?? undefined,
+    });
   } catch (err) {
     console.error("Login error:", err);
     return res.status(500).json({ error: "Login failed" });

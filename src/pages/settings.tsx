@@ -81,6 +81,8 @@ export default function SettingsPage() {
   const [proxyConnected, setProxyConnected] = useState(false);
   const [hardwareConnected, setHardwareConnected] = useState(false);
   const [profileInitial, setProfileInitial] = useState("Y");
+  const [username, setUsername] = useState("");
+  const [pronouns, setPronouns] = useState("");
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [notes, setNotes] = useState<NoteItem[]>([]);
   const [calendarMonth, setCalendarMonth] = useState(() => {
@@ -95,9 +97,40 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const hasAuth = !!localStorage.getItem("auth_token");
+    const token = localStorage.getItem("auth_token");
+    const hasAuth = !!token;
     setIsSignedIn(hasAuth);
-    setProfileInitial(hasAuth ? "U" : "Y");
+
+    const applyProfile = (email: string, storedPronouns: string) => {
+      const name = email ? email.split("@")[0] : "";
+      setUsername(name);
+      setPronouns(storedPronouns);
+      setProfileInitial(name ? name.charAt(0).toUpperCase() : hasAuth ? "U" : "Y");
+    };
+
+    const email = localStorage.getItem("user_email") || "";
+    const storedPronouns = localStorage.getItem("profile_pronouns") || "";
+    if (email || storedPronouns) {
+      applyProfile(email, storedPronouns);
+    } else if (hasAuth && token) {
+      fetch("/api/auth/me", {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
+      })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) => {
+          if (data?.email != null) {
+            localStorage.setItem("user_email", data.email);
+            if (data.pronouns != null) localStorage.setItem("profile_pronouns", data.pronouns);
+            applyProfile(data.email, data.pronouns ?? "");
+          } else {
+            applyProfile("", "");
+          }
+        })
+        .catch(() => applyProfile("", ""));
+    } else {
+      applyProfile("", "");
+    }
   }, []);
 
   useEffect(() => {
@@ -107,7 +140,7 @@ export default function SettingsPage() {
       setNotes([]);
       return;
     }
-    fetch(`/api/notes?user=${encodeURIComponent(userId)}`)
+    fetch(`/api/notes?user=${encodeURIComponent(userId)}`, { cache: "no-store" })
       .then((r) => r.json())
       .then((data) => setNotes(Array.isArray(data.notes) ? data.notes : []))
       .catch(() => setNotes([]));
@@ -117,8 +150,12 @@ export default function SettingsPage() {
     if (typeof window === "undefined") return;
     localStorage.removeItem("auth_token");
     localStorage.removeItem("user_id");
+    localStorage.removeItem("user_email");
+    localStorage.removeItem("profile_pronouns");
     setIsSignedIn(false);
     setProfileInitial("Y");
+    setUsername("");
+    setPronouns("");
     router.push("/login");
   };
 
@@ -133,6 +170,7 @@ export default function SettingsPage() {
 
   const last7Days = buildLast7Days(emotionsByDate);
   const weekNoteCount = last7Days.filter((d) => d.emotions.length > 0).length;
+  const weekNotesTotal = last7Days.reduce((sum, d) => sum + d.emotions.length, 0);
   const weekEmotions = last7Days.flatMap((d) => d.emotions);
   const emotionCounts: Record<string, number> = {};
   weekEmotions.forEach((e) => { emotionCounts[e] = (emotionCounts[e] ?? 0) + 1; });
@@ -247,10 +285,16 @@ export default function SettingsPage() {
               <div className={settingsStyles.profileCard} aria-label="Profile">
             <h2 className={settingsStyles.settingsTitle}>Profile</h2>
             <div className={settingsStyles.profileRow}>
-              <span className={settingsStyles.profileAvatar} aria-hidden>
+              <span className={settingsStyles.profileAvatar} aria-hidden title={username || "Profile"}>
                 {profileInitial}
               </span>
               <div className={settingsStyles.profileInfo}>
+                {isSignedIn && username ? (
+                  <p className={settingsStyles.profileUsername}>{username}</p>
+                ) : null}
+                {isSignedIn && pronouns ? (
+                  <p className={settingsStyles.profilePronouns}>{pronouns}</p>
+                ) : null}
                 <p className={settingsStyles.profileStatus}>
                   {isSignedIn ? "Signed in" : "Anonymous"}
                 </p>
@@ -301,9 +345,9 @@ export default function SettingsPage() {
               })}
             </div>
             <p className={settingsStyles.emotionTrackerHint}>
-              {weekNoteCount === 0
+              {weekNotesTotal === 0
                 ? "Log notes on Home to see your mood here."
-                : `${weekNoteCount} note${weekNoteCount !== 1 ? "s" : ""} this week`}
+                : `${weekNotesTotal} note${weekNotesTotal !== 1 ? "s" : ""} this week`}
             </p>
           </section>
           <div className={settingsStyles.settingsCard}>
@@ -405,18 +449,14 @@ export default function SettingsPage() {
             {dominantEmotion ? (
               <div
                 className={settingsStyles.reflectionWord}
-                style={{
-                  background: `${EMOTION_COLORS[dominantEmotion] ?? EMOTION_COLORS.Misc}22`,
-                  borderColor: EMOTION_COLORS[dominantEmotion] ?? EMOTION_COLORS.Misc,
-                  color: EMOTION_COLORS[dominantEmotion] ?? EMOTION_COLORS.Misc,
-                }}
+                style={{ background: emotionColorsAsGradient(weekEmotions) }}
               >
-                {dominantEmotion}
+                <span className={settingsStyles.reflectionWordText}>{dominantEmotion}</span>
               </div>
             ) : (
               <p className={settingsStyles.reflectionEmpty}>Log notes on Home — your reflection will appear here.</p>
             )}
-            {weekNoteCount > 0 && (
+            {weekNotesTotal > 0 && (
               <p className={settingsStyles.reflectionMuted} aria-hidden>from your notes</p>
             )}
           </section>

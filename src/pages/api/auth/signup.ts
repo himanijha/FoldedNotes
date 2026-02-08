@@ -47,7 +47,13 @@ export default async function handler(
 
     const userId = String(doc._id);
     const token = createToken({ userId, email: doc.email });
-    return res.status(200).json({ ok: true, token, userId, email: doc.email });
+    return res.status(200).json({
+      ok: true,
+      token,
+      userId,
+      email: doc.email,
+      pronouns: doc.pronouns ?? undefined,
+    });
   } catch (err) {
     console.error("Signup error:", err);
     return res.status(500).json({ error: "Sign up failed" });

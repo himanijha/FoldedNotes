@@ -77,6 +77,8 @@ export default function Login() {
             if (res.ok && data?.ok !== false) {
                 if (data?.token) localStorage.setItem("auth_token", data.token);
                 if (data?.userId) localStorage.setItem("user_id", data.userId);
+                if (data?.email) localStorage.setItem("user_email", data.email);
+                if (data?.pronouns != null) localStorage.setItem("profile_pronouns", data.pronouns);
                 router.push("/home");
                 return;
             }
@@ -115,6 +117,8 @@ export default function Login() {
             if (res.ok && data?.ok !== false) {
                 if (data?.token) localStorage.setItem("auth_token", data.token);
                 if (data?.userId) localStorage.setItem("user_id", data.userId);
+                if (data?.email) localStorage.setItem("user_email", data.email);
+                if (data?.pronouns != null) localStorage.setItem("profile_pronouns", data.pronouns);
                 router.push("/home");
                 return;
             }
