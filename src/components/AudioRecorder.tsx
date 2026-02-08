@@ -1,11 +1,15 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import styles from "@/styles/AudioRecorder.module.css";
+import styles from "../styles/AudioRecorder.module.css";
 
 const LEVEL_BARS = 20;
 
 type RecordingState = "idle" | "recording" | "recorded" | "submitted" | "error";
 
-export default function AudioRecorder() {
+type AudioRecorderProps = {
+  onTranscriptReady?: (text: string) => void;
+};
+
+export default function AudioRecorder({ onTranscriptReady }: AudioRecorderProps) {
   const [state, setState] = useState<RecordingState>("idle");
   const [error, setError] = useState<string | null>(null);
   const [duration, setDuration] = useState(0);
@@ -189,6 +193,10 @@ export default function AudioRecorder() {
         language_code: data.language_code,
       });
       setState("submitted");
+
+      if (onTranscriptReady && data.text) {
+        onTranscriptReady(data.text);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to process recording");
     } finally {
