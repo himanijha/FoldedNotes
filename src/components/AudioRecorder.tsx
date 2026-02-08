@@ -1,12 +1,16 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import styles from "@/styles/AudioRecorder.module.css";
-import { setStoredTranscript } from "@/components/GenerateFromTranscript";
+import styles from "../styles/AudioRecorder.module.css";
+import { setStoredTranscript } from "./GenerateFromTranscript";
 
 const LEVEL_BARS = 20;
 
 type RecordingState = "idle" | "recording" | "recorded" | "submitted" | "error";
 
-export default function AudioRecorder() {
+type AudioRecorderProps = {
+  onTranscriptReady?: (text: string) => void;
+};
+
+export default function AudioRecorder({ onTranscriptReady }: AudioRecorderProps) {
   const [state, setState] = useState<RecordingState>("idle");
   const [error, setError] = useState<string | null>(null);
   const [duration, setDuration] = useState(0);
@@ -28,6 +32,17 @@ export default function AudioRecorder() {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const frequencyDataRef = useRef<Uint8Array<ArrayBuffer> | null>(null);
+
+  const classifyEmotion = async (text: string) => {
+    const res = await fetch("/api/classify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
+    const data = await res.json();
+    console.log("Classify API response:", data); // <--- Check the JSON here
+    return data.emotion;
+  };
 
   const clearDuration = useCallback(() => {
     if (durationIntervalRef.current) {
@@ -189,6 +204,10 @@ export default function AudioRecorder() {
         language_code: data.language_code,
       });
       setState("submitted");
+
+      if (onTranscriptReady && data.text) {
+        onTranscriptReady(data.text);
+      }
     } catch (err) {
       const elapsed = Date.now() - start;
       const wait = Math.max(0, SENDING_MIN_MS - elapsed);

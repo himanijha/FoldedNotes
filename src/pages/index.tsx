@@ -1,7 +1,7 @@
 import Head from "next/head";
 import dynamic from "next/dynamic";
 import { Fredoka, Nunito } from "next/font/google";
-import styles from "@/styles/Home.module.css";
+import styles from "../styles/Home.module.css";
 
 const fredoka = Fredoka({
   variable: "--font-fredoka",
@@ -20,6 +20,17 @@ const AudioRecorder = dynamic(() => import("@/components/AudioRecorder"), {
 });
 
 export default function Home() {
+  async function classifyEmotion(text: string) {
+    const res = await fetch("/api/classify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
+
+    const data = await res.json();
+    console.log("Emotion result:", data);
+  }
+
   return (
     <>
       <Head>
@@ -31,6 +42,7 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
+
       <div className={`${styles.page} ${fredoka.variable} ${nunito.variable}`}>
         <div className={styles.bgBlobs} aria-hidden>
           <span className={styles.blob1} />
@@ -51,7 +63,8 @@ export default function Home() {
               through for anyone who needs to hear it.
             </p>
           </div>
-          <AudioRecorder />
+
+          <AudioRecorder onTranscriptReady={classifyEmotion} />
         </main>
       </div>
     </>
