@@ -1,5 +1,5 @@
 // src/lib/prompts.ts
-import { EMOTIONS } from "../../types/emotion";
+import { EMOTIONS } from "../types/emotion";
 
 export const emotionPrompt = (text: string) => `
 You are an emotion classification system.
